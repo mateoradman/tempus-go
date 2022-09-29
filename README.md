@@ -1,2 +1,1 @@
-# tempus-server
-Tempus - a time tracking software
+# Tempus - a time tracking software

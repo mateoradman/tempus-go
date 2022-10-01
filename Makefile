@@ -5,10 +5,10 @@ createdb:
 	docker exec -it postgres14 createdb --username=root --owner=root tempus
 
 migrateup:
-	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/tempus?sslmode=disable" -verbose up
+	migrate -path internal/db/migration -database "postgresql://root:secret@localhost:5432/tempus?sslmode=disable" -verbose up
 
 migratedown:
-	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/tempus?sslmode=disable" -verbose down
+	migrate -path internal/db/migration -database "postgresql://root:secret@localhost:5432/tempus?sslmode=disable" -verbose down
 
 dropdb:
 	docker exec -it postgres14 dropdb tempus

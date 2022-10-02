@@ -56,7 +56,7 @@ CREATE TABLE "entries" (
   "id" bigserial PRIMARY KEY,
   "user_id" bigint NOT NULL,
   "start_time" timestamp NOT NULL DEFAULT (now()),
-  "end_time" timestamp NOT NULL,
+  "end_time" timestamp DEFAULT null,
   "created_at" timestamp NOT NULL DEFAULT (now()),
   "updated_at" timestamp DEFAULT null,
   "date" date NOT NULL DEFAULT (now())

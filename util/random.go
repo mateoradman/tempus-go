@@ -34,6 +34,6 @@ func RandomEmail() string {
 
 func RandomGender() string {
 	genders := []Gender{Male, Female, Other, Unknown}
-	randomInt := RandomInt(0, int64(len(genders) - 1))
+	randomInt := RandomInt(0, int64(len(genders)-1))
 	return genders[randomInt].String()
 }

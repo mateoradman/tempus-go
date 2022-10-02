@@ -1,4 +1,4 @@
-package	util
+package util
 
 type Gender int64
 
@@ -23,4 +23,3 @@ func (g Gender) String() string {
 	}
 	return ""
 }
-

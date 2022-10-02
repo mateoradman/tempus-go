@@ -105,27 +105,26 @@ func TestListTeams(t *testing.T) {
 	}
 }
 
-
 func TestListTeamMembers(t *testing.T) {
 	users := []User{}
 	team := createRandomTeam(t)
 	for i := 0; i < 10; i++ {
 		user := createRandomUser(t)
 		arg := UpdateUserParams{
-			ID: user.ID,
+			ID:       user.ID,
 			Username: user.Username,
-			Email: user.Email,
-			Name: user.Name,
-			Surname: user.Surname,
+			Email:    user.Email,
+			Name:     user.Name,
+			Surname:  user.Surname,
 			TeamID: sql.NullInt64{
 				Valid: true,
 				Int64: team.ID,
 			},
-			Gender: user.Gender,
+			Gender:    user.Gender,
 			BirthDate: user.BirthDate,
-			Language: user.Language,
-			Country: user.Country,
-			Timezone: user.Timezone,
+			Language:  user.Language,
+			Country:   user.Country,
+			Timezone:  user.Timezone,
 			ManagerID: user.ManagerID,
 			CompanyID: user.CompanyID,
 		}
@@ -145,4 +144,3 @@ func TestListTeamMembers(t *testing.T) {
 	require.NoError(t, err)
 	require.Subset(t, employees, users)
 }
-

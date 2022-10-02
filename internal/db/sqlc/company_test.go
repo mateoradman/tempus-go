@@ -97,22 +97,22 @@ func TestListEmployee(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		user := createRandomUser(t)
 		arg := UpdateUserParams{
-			ID: user.ID,
+			ID:       user.ID,
 			Username: user.Username,
-			Email: user.Email,
-			Name: user.Name,
-			Surname: user.Surname,
+			Email:    user.Email,
+			Name:     user.Name,
+			Surname:  user.Surname,
 			CompanyID: sql.NullInt64{
 				Valid: true,
 				Int64: company.ID,
 			},
-			Gender: user.Gender,
+			Gender:    user.Gender,
 			BirthDate: user.BirthDate,
-			Language: user.Language,
-			Country: user.Country,
-			Timezone: user.Timezone,
+			Language:  user.Language,
+			Country:   user.Country,
+			Timezone:  user.Timezone,
 			ManagerID: user.ManagerID,
-			TeamID: user.TeamID,
+			TeamID:    user.TeamID,
 		}
 		updatedUser, err := testQueries.UpdateUser(context.Background(), arg)
 		require.NoError(t, err)

@@ -32,7 +32,7 @@ type Entry struct {
 	ID        int64        `json:"id"`
 	UserID    int64        `json:"user_id"`
 	StartTime time.Time    `json:"start_time"`
-	EndTime   time.Time    `json:"end_time"`
+	EndTime   sql.NullTime `json:"end_time"`
 	CreatedAt time.Time    `json:"created_at"`
 	UpdatedAt sql.NullTime `json:"updated_at"`
 	Date      time.Time    `json:"date"`

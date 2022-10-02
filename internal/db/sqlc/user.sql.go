@@ -268,14 +268,13 @@ email = $3,
 name = $4,
 surname = $5,
 company_id = $6,
-password = $7,
-gender = $8,
-birth_date = $9,
-language = $10,
-country = $11,
-timezone = $12,
-manager_id = $13,
-team_id = $14
+gender = $7,
+birth_date = $8,
+language = $9,
+country = $10,
+timezone = $11,
+manager_id = $12,
+team_id = $13
 WHERE id = $1
 RETURNING id, username, email, name, surname, company_id, password, gender, birth_date, created_at, updated_at, language, country, timezone, manager_id, team_id
 `
@@ -287,7 +286,6 @@ type UpdateUserParams struct {
 	Name      string         `json:"name"`
 	Surname   string         `json:"surname"`
 	CompanyID sql.NullInt64  `json:"company_id"`
-	Password  string         `json:"password"`
 	Gender    string         `json:"gender"`
 	BirthDate time.Time      `json:"birth_date"`
 	Language  string         `json:"language"`
@@ -305,7 +303,6 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		arg.Name,
 		arg.Surname,
 		arg.CompanyID,
-		arg.Password,
 		arg.Gender,
 		arg.BirthDate,
 		arg.Language,

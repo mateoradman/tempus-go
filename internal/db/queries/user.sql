@@ -51,14 +51,13 @@ email = $3,
 name = $4,
 surname = $5,
 company_id = $6,
-password = $7,
-gender = $8,
-birth_date = $9,
-language = $10,
-country = $11,
-timezone = $12,
-manager_id = $13,
-team_id = $14
+gender = $7,
+birth_date = $8,
+language = $9,
+country = $10,
+timezone = $11,
+manager_id = $12,
+team_id = $13
 WHERE id = $1
 RETURNING *;
 

@@ -22,4 +22,4 @@ server:
 test:
 	go test -v -cover ./...
 
-.PHONY: postgres createdb dropdb sqlc server test
+.PHONY: postgres createdb dropdb sqlc server test migrateup migratedown

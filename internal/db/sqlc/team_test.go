@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"testing"
 	"time"
 
@@ -11,12 +10,10 @@ import (
 )
 
 func createRandomTeam(t *testing.T) Team {
+	user := createRandomUser(t)
 	arg := CreateTeamParams{
-		Name: util.RandomString(100),
-		ManagerID: sql.NullInt64{
-			Valid: true,
-			Int64: createRandomUser(t).ID,
-		},
+		Name:      util.RandomString(100),
+		ManagerID: &user.ID,
 	}
 
 	team, err := testQueries.CreateTeam(context.Background(), arg)
@@ -26,7 +23,7 @@ func createRandomTeam(t *testing.T) Team {
 	require.Equal(t, arg.ManagerID, team.ManagerID)
 	require.NotZero(t, team.ID)
 	require.WithinDuration(t, time.Now(), team.CreatedAt, 2*time.Second)
-	require.False(t, team.UpdatedAt.Valid)
+	require.Nil(t, team.UpdatedAt)
 
 	return team
 }
@@ -53,12 +50,9 @@ func TestUpdateTeam(t *testing.T) {
 	expectedLen := 25
 	name := util.RandomString(expectedLen)
 	arg := UpdateTeamParams{
-		ID:   team.ID,
-		Name: name,
-		ManagerID: sql.NullInt64{
-			Int64: manager.ID,
-			Valid: true,
-		},
+		ID:        team.ID,
+		Name:      name,
+		ManagerID: &manager.ID,
 	}
 
 	updatedTeam, err := testQueries.UpdateTeam(context.Background(), arg)
@@ -68,8 +62,8 @@ func TestUpdateTeam(t *testing.T) {
 	require.Equal(t, name, updatedTeam.Name)
 	require.Len(t, name, expectedLen)
 	require.Equal(t, arg.ManagerID, updatedTeam.ManagerID)
-	require.True(t, updatedTeam.UpdatedAt.Valid)
-	require.WithinDuration(t, time.Now(), updatedTeam.UpdatedAt.Time, time.Second)
+	require.NotNil(t, updatedTeam.UpdatedAt)
+	require.WithinDuration(t, time.Now(), *updatedTeam.UpdatedAt, time.Second)
 	require.Equal(t, team.CreatedAt, updatedTeam.CreatedAt)
 }
 
@@ -80,7 +74,7 @@ func TestDeleteTeam(t *testing.T) {
 	require.NotEmpty(t, deletedTeam)
 	require.Equal(t, team.ID, deletedTeam.ID)
 	require.Equal(t, team.Name, deletedTeam.Name)
-	require.False(t, deletedTeam.UpdatedAt.Valid)
+	require.Nil(t, deletedTeam.UpdatedAt)
 	require.Equal(t, team.CreatedAt, deletedTeam.CreatedAt)
 	require.Equal(t, team.ManagerID, deletedTeam.ManagerID)
 }
@@ -111,15 +105,12 @@ func TestListTeamMembers(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		user := createRandomUser(t)
 		arg := UpdateUserParams{
-			ID:       user.ID,
-			Username: user.Username,
-			Email:    user.Email,
-			Name:     user.Name,
-			Surname:  user.Surname,
-			TeamID: sql.NullInt64{
-				Valid: true,
-				Int64: team.ID,
-			},
+			ID:        user.ID,
+			Username:  user.Username,
+			Email:     user.Email,
+			Name:      user.Name,
+			Surname:   user.Surname,
+			TeamID:    &team.ID,
 			Gender:    user.Gender,
 			BirthDate: user.BirthDate,
 			Language:  user.Language,
@@ -133,10 +124,7 @@ func TestListTeamMembers(t *testing.T) {
 		users = append(users, updatedUser)
 	}
 	arg := ListTeamMembersParams{
-		TeamID: sql.NullInt64{
-			Int64: team.ID,
-			Valid: true,
-		},
+		TeamID: &team.ID,
 		Limit:  100,
 		Offset: 0,
 	}

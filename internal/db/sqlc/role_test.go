@@ -22,7 +22,7 @@ func createRandomRole(t *testing.T) Role {
 	require.Equal(t, arg.Description, role.Description)
 	require.NotZero(t, role.ID)
 	require.NotNil(t, role.CreatedAt)
-	require.False(t, role.UpdatedAt.Valid)
+	require.Nil(t, role.UpdatedAt)
 
 	return role
 }
@@ -60,8 +60,8 @@ func TestUpdateRole(t *testing.T) {
 	require.Equal(t, role.ID, updatedRole.ID)
 	require.Equal(t, name, updatedRole.Name)
 	require.Equal(t, updatedRole.Name, updatedRole.Description)
-	require.True(t, updatedRole.UpdatedAt.Valid)
-	require.WithinDuration(t, time.Now(), updatedRole.UpdatedAt.Time, time.Second)
+	require.NotNil(t, updatedRole.UpdatedAt)
+	require.WithinDuration(t, time.Now(), *updatedRole.UpdatedAt, time.Second)
 	require.Equal(t, role.CreatedAt, updatedRole.CreatedAt)
 }
 
@@ -73,7 +73,7 @@ func TestDeleteRole(t *testing.T) {
 	require.Equal(t, role.ID, deletedRole.ID)
 	require.Equal(t, role.Name, deletedRole.Name)
 	require.Equal(t, role.Description, deletedRole.Description)
-	require.False(t, deletedRole.UpdatedAt.Valid)
+	require.Nil(t, deletedRole.UpdatedAt)
 	require.Equal(t, role.CreatedAt, deletedRole.CreatedAt)
 }
 

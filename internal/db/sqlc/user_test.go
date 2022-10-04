@@ -38,11 +38,11 @@ func createRandomUser(t *testing.T) User {
 	require.WithinDuration(t, time.Now().UTC(), user.CreatedAt, 2*time.Second)
 
 	// test if default values were correctly set
-	require.False(t, user.UpdatedAt.Valid)
-	require.False(t, user.CompanyID.Valid)
-	require.False(t, user.Timezone.Valid)
-	require.False(t, user.ManagerID.Valid)
-	require.False(t, user.TeamID.Valid)
+	require.Nil(t, user.UpdatedAt)
+	require.Nil(t, user.CompanyID)
+	require.Nil(t, user.Timezone)
+	require.Nil(t, user.ManagerID)
+	require.Nil(t, user.TeamID)
 
 	return user
 }
@@ -60,10 +60,10 @@ func validateGetQuery(t *testing.T, user, gotUser User) {
 	require.Equal(t, user.Country, gotUser.Country)
 	// test if default values were correctly set
 	require.Equal(t, user.UpdatedAt, gotUser.UpdatedAt)
-	require.False(t, user.CompanyID.Valid)
-	require.False(t, user.Timezone.Valid)
-	require.False(t, user.ManagerID.Valid)
-	require.False(t, user.TeamID.Valid)
+	require.Nil(t, user.CompanyID)
+	require.Nil(t, user.Timezone)
+	require.Nil(t, user.ManagerID)
+	require.Nil(t, user.TeamID)
 }
 
 func TestCreateUser(t *testing.T) {
@@ -130,8 +130,8 @@ func TestUpdateUser(t *testing.T) {
 
 	// validate times remain unchanged
 	require.Equal(t, user.CreatedAt, updatedUser.CreatedAt)
-	require.True(t, updatedUser.UpdatedAt.Valid)
-	require.WithinDuration(t, time.Now(), updatedUser.UpdatedAt.Time, time.Second)
+	require.NotNil(t, updatedUser.UpdatedAt)
+	require.WithinDuration(t, time.Now(), *updatedUser.UpdatedAt, time.Second)
 }
 
 func TestDeleteUser(t *testing.T) {
@@ -143,7 +143,7 @@ func TestDeleteUser(t *testing.T) {
 	require.Equal(t, user.Username, deletedUser.Username)
 	require.Equal(t, user.Email, deletedUser.Email)
 	require.Equal(t, user.Name, deletedUser.Name)
-	require.False(t, deletedUser.UpdatedAt.Valid)
+	require.Nil(t, deletedUser.UpdatedAt)
 	require.Equal(t, user.CreatedAt, deletedUser.CreatedAt)
 	require.Equal(t, user.ManagerID, deletedUser.ManagerID)
 }

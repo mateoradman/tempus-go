@@ -7,7 +7,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createTeam = `-- name: CreateTeam :one
@@ -21,8 +20,8 @@ RETURNING id, name, manager_id, created_at, updated_at
 `
 
 type CreateTeamParams struct {
-	Name      string        `json:"name"`
-	ManagerID sql.NullInt64 `json:"manager_id"`
+	Name      string `json:"name"`
+	ManagerID *int64 `json:"manager_id"`
 }
 
 func (q *Queries) CreateTeam(ctx context.Context, arg CreateTeamParams) (Team, error) {
@@ -88,9 +87,9 @@ OFFSET $3
 `
 
 type ListTeamMembersParams struct {
-	TeamID sql.NullInt64 `json:"team_id"`
-	Limit  int32         `json:"limit"`
-	Offset int32         `json:"offset"`
+	TeamID *int64 `json:"team_id"`
+	Limit  int32  `json:"limit"`
+	Offset int32  `json:"offset"`
 }
 
 func (q *Queries) ListTeamMembers(ctx context.Context, arg ListTeamMembersParams) ([]User, error) {
@@ -177,9 +176,9 @@ RETURNING id, name, manager_id, created_at, updated_at
 `
 
 type UpdateTeamParams struct {
-	ID        int64         `json:"id"`
-	Name      string        `json:"name"`
-	ManagerID sql.NullInt64 `json:"manager_id"`
+	ID        int64  `json:"id"`
+	Name      string `json:"name"`
+	ManagerID *int64 `json:"manager_id"`
 }
 
 func (q *Queries) UpdateTeam(ctx context.Context, arg UpdateTeamParams) (Team, error) {

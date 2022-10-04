@@ -19,7 +19,7 @@ func createRandomPermission(t *testing.T) Permission {
 
 	require.NotZero(t, permission.ID)
 	require.NotNil(t, permission.CreatedAt)
-	require.False(t, permission.UpdatedAt.Valid)
+	require.Nil(t, permission.UpdatedAt)
 
 	return permission
 }
@@ -54,8 +54,8 @@ func TestUpdatePermission(t *testing.T) {
 	require.NotEmpty(t, updatedPermission)
 	require.Equal(t, permission.ID, updatedPermission.ID)
 	require.Equal(t, name, updatedPermission.Name)
-	require.True(t, updatedPermission.UpdatedAt.Valid)
-	require.WithinDuration(t, time.Now(), updatedPermission.UpdatedAt.Time, time.Second)
+	require.NotNil(t, updatedPermission.UpdatedAt)
+	require.WithinDuration(t, time.Now(), *updatedPermission.UpdatedAt, time.Second)
 	require.Equal(t, permission.CreatedAt, updatedPermission.CreatedAt)
 }
 
@@ -66,7 +66,7 @@ func TestDeletePermission(t *testing.T) {
 	require.NotEmpty(t, deletedPermission)
 	require.Equal(t, permission.ID, deletedPermission.ID)
 	require.Equal(t, permission.Name, deletedPermission.Name)
-	require.False(t, deletedPermission.UpdatedAt.Valid)
+	require.Nil(t, deletedPermission.UpdatedAt)
 	require.Equal(t, permission.CreatedAt, deletedPermission.CreatedAt)
 }
 

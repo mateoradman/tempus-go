@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"testing"
 	"time"
 
@@ -20,7 +19,7 @@ func createRandomCompany(t *testing.T) Company {
 
 	require.NotZero(t, company.ID)
 	require.NotNil(t, company.CreatedAt)
-	require.False(t, company.UpdatedAt.Valid)
+	require.Nil(t, company.UpdatedAt)
 
 	return company
 }
@@ -55,8 +54,8 @@ func TestUpdateCompany(t *testing.T) {
 	require.NotEmpty(t, updatedCompany)
 	require.Equal(t, company.ID, updatedCompany.ID)
 	require.Equal(t, name, updatedCompany.Name)
-	require.True(t, updatedCompany.UpdatedAt.Valid)
-	require.WithinDuration(t, time.Now(), updatedCompany.UpdatedAt.Time, time.Second)
+	require.NotNil(t, updatedCompany.UpdatedAt)
+	require.WithinDuration(t, time.Now(), *updatedCompany.UpdatedAt, time.Second)
 	require.Equal(t, company.CreatedAt, updatedCompany.CreatedAt)
 }
 
@@ -67,7 +66,7 @@ func TestDeleteCompany(t *testing.T) {
 	require.NotEmpty(t, deletedCompany)
 	require.Equal(t, company.ID, deletedCompany.ID)
 	require.Equal(t, company.Name, deletedCompany.Name)
-	require.False(t, deletedCompany.UpdatedAt.Valid)
+	require.Nil(t, deletedCompany.UpdatedAt)
 	require.Equal(t, company.CreatedAt, deletedCompany.CreatedAt)
 }
 
@@ -97,15 +96,12 @@ func TestListEmployee(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		user := createRandomUser(t)
 		arg := UpdateUserParams{
-			ID:       user.ID,
-			Username: user.Username,
-			Email:    user.Email,
-			Name:     user.Name,
-			Surname:  user.Surname,
-			CompanyID: sql.NullInt64{
-				Valid: true,
-				Int64: company.ID,
-			},
+			ID:        user.ID,
+			Username:  user.Username,
+			Email:     user.Email,
+			Name:      user.Name,
+			Surname:   user.Surname,
+			CompanyID: &company.ID,
 			Gender:    user.Gender,
 			BirthDate: user.BirthDate,
 			Language:  user.Language,
@@ -119,12 +115,9 @@ func TestListEmployee(t *testing.T) {
 		users = append(users, updatedUser)
 	}
 	arg := ListCompanyEmployeesParams{
-		CompanyID: sql.NullInt64{
-			Int64: company.ID,
-			Valid: true,
-		},
-		Limit:  100,
-		Offset: 0,
+		CompanyID: &company.ID,
+		Limit:     100,
+		Offset:    0,
 	}
 	employees, err := testQueries.ListCompanyEmployees(context.Background(), arg)
 	require.NoError(t, err)

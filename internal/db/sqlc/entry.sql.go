@@ -7,7 +7,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"time"
 )
 
@@ -24,10 +23,10 @@ RETURNING id, user_id, start_time, end_time, created_at, updated_at, date
 `
 
 type CreateEntryParams struct {
-	UserID    int64        `json:"user_id"`
-	StartTime time.Time    `json:"start_time"`
-	EndTime   sql.NullTime `json:"end_time"`
-	Date      time.Time    `json:"date"`
+	UserID    int64      `json:"user_id"`
+	StartTime time.Time  `json:"start_time"`
+	EndTime   *time.Time `json:"end_time"`
+	Date      time.Time  `json:"date"`
 }
 
 func (q *Queries) CreateEntry(ctx context.Context, arg CreateEntryParams) (Entry, error) {
@@ -186,10 +185,10 @@ RETURNING id, user_id, start_time, end_time, created_at, updated_at, date
 `
 
 type UpdateEntryParams struct {
-	ID        int64        `json:"id"`
-	UserID    int64        `json:"user_id"`
-	StartTime time.Time    `json:"start_time"`
-	EndTime   sql.NullTime `json:"end_time"`
+	ID        int64      `json:"id"`
+	UserID    int64      `json:"user_id"`
+	StartTime time.Time  `json:"start_time"`
+	EndTime   *time.Time `json:"end_time"`
 }
 
 func (q *Queries) UpdateEntry(ctx context.Context, arg UpdateEntryParams) (Entry, error) {

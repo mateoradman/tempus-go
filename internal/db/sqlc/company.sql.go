@@ -7,7 +7,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createCompany = `-- name: CreateCompany :one
@@ -117,9 +116,9 @@ OFFSET $3
 `
 
 type ListCompanyEmployeesParams struct {
-	CompanyID sql.NullInt64 `json:"company_id"`
-	Limit     int32         `json:"limit"`
-	Offset    int32         `json:"offset"`
+	CompanyID *int64 `json:"company_id"`
+	Limit     int32  `json:"limit"`
+	Offset    int32  `json:"offset"`
 }
 
 func (q *Queries) ListCompanyEmployees(ctx context.Context, arg ListCompanyEmployeesParams) ([]User, error) {

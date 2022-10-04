@@ -27,9 +27,9 @@ func createRandomEntry(t *testing.T) Entry {
 	require.Equal(t, today.Day(), entry.Date.Day())
 	require.Equal(t, today.Month(), entry.Date.Month())
 	require.Equal(t, today.Year(), entry.Date.Year())
-	require.False(t, entry.EndTime.Valid)
+	require.Nil(t, entry.EndTime)
 	require.WithinDuration(t, time.Now(), entry.CreatedAt, 2*time.Second)
-	require.False(t, entry.UpdatedAt.Valid)
+	require.Nil(t, entry.UpdatedAt)
 
 	return entry
 }
@@ -69,8 +69,8 @@ func TestUpdateEntry(t *testing.T) {
 	require.Equal(t, arg.UserID, updatedEntry.UserID)
 	require.Equal(t, arg.StartTime, updatedEntry.StartTime)
 	require.Equal(t, entry.EndTime, updatedEntry.EndTime)
-	require.True(t, updatedEntry.UpdatedAt.Valid)
-	require.WithinDuration(t, time.Now(), updatedEntry.UpdatedAt.Time, time.Second)
+	require.NotNil(t, updatedEntry.UpdatedAt)
+	require.WithinDuration(t, time.Now(), *updatedEntry.UpdatedAt, time.Second)
 	require.Equal(t, entry.CreatedAt, updatedEntry.CreatedAt)
 }
 

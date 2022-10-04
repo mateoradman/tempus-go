@@ -7,7 +7,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"time"
 )
 
@@ -26,12 +25,12 @@ RETURNING id, user_id, reason, paid, date, created_at, updated_at, approved_by_i
 `
 
 type CreateAbsenceParams struct {
-	UserID       int64         `json:"user_id"`
-	Reason       string        `json:"reason"`
-	Paid         bool          `json:"paid"`
-	Date         time.Time     `json:"date"`
-	ApprovedByID sql.NullInt64 `json:"approved_by_id"`
-	Length       float32       `json:"length"`
+	UserID       int64     `json:"user_id"`
+	Reason       string    `json:"reason"`
+	Paid         bool      `json:"paid"`
+	Date         time.Time `json:"date"`
+	ApprovedByID *int64    `json:"approved_by_id"`
+	Length       float32   `json:"length"`
 }
 
 func (q *Queries) CreateAbsence(ctx context.Context, arg CreateAbsenceParams) (Absence, error) {
@@ -202,13 +201,13 @@ RETURNING id, user_id, reason, paid, date, created_at, updated_at, approved_by_i
 `
 
 type UpdateAbsenceParams struct {
-	ID           int64         `json:"id"`
-	UserID       int64         `json:"user_id"`
-	Reason       string        `json:"reason"`
-	Paid         bool          `json:"paid"`
-	Date         time.Time     `json:"date"`
-	ApprovedByID sql.NullInt64 `json:"approved_by_id"`
-	Length       float32       `json:"length"`
+	ID           int64     `json:"id"`
+	UserID       int64     `json:"user_id"`
+	Reason       string    `json:"reason"`
+	Paid         bool      `json:"paid"`
+	Date         time.Time `json:"date"`
+	ApprovedByID *int64    `json:"approved_by_id"`
+	Length       float32   `json:"length"`
 }
 
 func (q *Queries) UpdateAbsence(ctx context.Context, arg UpdateAbsenceParams) (Absence, error) {

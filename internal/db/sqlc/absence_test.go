@@ -29,9 +29,9 @@ func createRandomAbsence(t *testing.T) Absence {
 	require.Equal(t, today.Day(), absence.Date.Day())
 	require.Equal(t, today.Month(), absence.Date.Month())
 	require.Equal(t, today.Year(), absence.Date.Year())
-	require.False(t, absence.ApprovedByID.Valid)
+	require.Nil(t, absence.ApprovedByID)
 	require.WithinDuration(t, time.Now(), absence.CreatedAt, 2*time.Second)
-	require.False(t, absence.UpdatedAt.Valid)
+	require.Nil(t, absence.UpdatedAt)
 
 	return absence
 }
@@ -77,8 +77,8 @@ func TestUpdateAbsence(t *testing.T) {
 	require.Equal(t, today.Month(), absence.Date.Month())
 	require.Equal(t, today.Year(), absence.Date.Year())
 	require.Equal(t, arg.Length, updatedAbsence.Length)
-	require.True(t, updatedAbsence.UpdatedAt.Valid)
-	require.WithinDuration(t, time.Now(), updatedAbsence.UpdatedAt.Time, time.Second)
+	require.NotNil(t, updatedAbsence.UpdatedAt)
+	require.WithinDuration(t, time.Now(), *updatedAbsence.UpdatedAt, time.Second)
 	require.Equal(t, absence.CreatedAt, updatedAbsence.CreatedAt)
 }
 

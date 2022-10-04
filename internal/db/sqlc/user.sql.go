@@ -7,7 +7,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"time"
 )
 
@@ -33,19 +32,19 @@ RETURNING id, username, email, name, surname, company_id, password, gender, birt
 `
 
 type CreateUserParams struct {
-	Username  string         `json:"username"`
-	Email     string         `json:"email"`
-	Name      string         `json:"name"`
-	Surname   string         `json:"surname"`
-	CompanyID sql.NullInt64  `json:"company_id"`
-	Password  string         `json:"password"`
-	Gender    string         `json:"gender"`
-	BirthDate time.Time      `json:"birth_date"`
-	Language  string         `json:"language"`
-	Country   string         `json:"country"`
-	Timezone  sql.NullString `json:"timezone"`
-	ManagerID sql.NullInt64  `json:"manager_id"`
-	TeamID    sql.NullInt64  `json:"team_id"`
+	Username  string    `json:"username"`
+	Email     string    `json:"email"`
+	Name      string    `json:"name"`
+	Surname   string    `json:"surname"`
+	CompanyID *int64    `json:"company_id"`
+	Password  string    `json:"password"`
+	Gender    string    `json:"gender"`
+	BirthDate time.Time `json:"birth_date"`
+	Language  string    `json:"language"`
+	Country   string    `json:"country"`
+	Timezone  *string   `json:"timezone"`
+	ManagerID *int64    `json:"manager_id"`
+	TeamID    *int64    `json:"team_id"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -280,19 +279,19 @@ RETURNING id, username, email, name, surname, company_id, password, gender, birt
 `
 
 type UpdateUserParams struct {
-	ID        int64          `json:"id"`
-	Username  string         `json:"username"`
-	Email     string         `json:"email"`
-	Name      string         `json:"name"`
-	Surname   string         `json:"surname"`
-	CompanyID sql.NullInt64  `json:"company_id"`
-	Gender    string         `json:"gender"`
-	BirthDate time.Time      `json:"birth_date"`
-	Language  string         `json:"language"`
-	Country   string         `json:"country"`
-	Timezone  sql.NullString `json:"timezone"`
-	ManagerID sql.NullInt64  `json:"manager_id"`
-	TeamID    sql.NullInt64  `json:"team_id"`
+	ID        int64     `json:"id"`
+	Username  string    `json:"username"`
+	Email     string    `json:"email"`
+	Name      string    `json:"name"`
+	Surname   string    `json:"surname"`
+	CompanyID *int64    `json:"company_id"`
+	Gender    string    `json:"gender"`
+	BirthDate time.Time `json:"birth_date"`
+	Language  string    `json:"language"`
+	Country   string    `json:"country"`
+	Timezone  *string   `json:"timezone"`
+	ManagerID *int64    `json:"manager_id"`
+	TeamID    *int64    `json:"team_id"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {

@@ -28,7 +28,10 @@ RETURNING *;
 -- name: ListCompanyEmployees :many
 SELECT *
 FROM users
-WHERE company_id = $1
+WHERE users.company_id =
+    (SELECT companies.id
+    FROM companies
+    WHERE companies.id = $1)
 ORDER BY id
 LIMIT $2
 OFFSET $3;

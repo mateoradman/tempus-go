@@ -115,7 +115,7 @@ func TestListEmployee(t *testing.T) {
 		users = append(users, updatedUser)
 	}
 	arg := ListCompanyEmployeesParams{
-		CompanyID: &company.ID,
+		ID: company.ID,
 		Limit:     100,
 		Offset:    0,
 	}

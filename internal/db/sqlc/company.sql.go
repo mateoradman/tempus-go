@@ -109,20 +109,23 @@ func (q *Queries) ListCompanies(ctx context.Context, arg ListCompaniesParams) ([
 const listCompanyEmployees = `-- name: ListCompanyEmployees :many
 SELECT id, username, email, name, surname, company_id, password, gender, birth_date, created_at, updated_at, language, country, timezone, manager_id, team_id
 FROM users
-WHERE company_id = $1
+WHERE users.company_id =
+        (SELECT companies.id
+         FROM companies
+         WHERE companies.id = $1 LIMIT 1)
 ORDER BY id
 LIMIT $2
 OFFSET $3
 `
 
 type ListCompanyEmployeesParams struct {
-	CompanyID *int64 `json:"company_id"`
-	Limit     int32  `json:"limit"`
-	Offset    int32  `json:"offset"`
+	ID     int64 `json:"id"`
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
 }
 
 func (q *Queries) ListCompanyEmployees(ctx context.Context, arg ListCompanyEmployeesParams) ([]User, error) {
-	rows, err := q.db.Query(ctx, listCompanyEmployees, arg.CompanyID, arg.Limit, arg.Offset)
+	rows, err := q.db.Query(ctx, listCompanyEmployees, arg.ID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}

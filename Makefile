@@ -22,4 +22,7 @@ server:
 test:
 	go test -v -cover ./...
 
-.PHONY: postgres createdb dropdb sqlc server test migrateup migratedown
+mock:
+	mockgen -package mockdb -destination internal/db/mock/store.go github.com/mateoradman/tempus/internal/db/sqlc Store
+
+.PHONY: postgres createdb dropdb sqlc server test migrateup migratedown mock

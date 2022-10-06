@@ -14,6 +14,8 @@ sql:
       emit_interface: true
       emit_empty_slices: true
       overrides: 
+        - column: users.password
+          go_struct_tag: 'json:"-"'
         - db_type: 'pg_catalog.varchar'
           go_type:
             type: 'string'

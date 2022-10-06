@@ -21,3 +21,7 @@ go.work
 
 # MacOS
 .DS_Store
+
+# IDE folders
+.idea/
+.vscode/

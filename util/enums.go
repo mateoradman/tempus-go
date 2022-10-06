@@ -1,25 +1,18 @@
 package util
 
-type Gender int64
-
+// Constants for all supported gender choices
 const (
-	Undefined Gender = iota
-	Male
-	Female
-	Other
-	Unknown
+	Male    = "male"
+	Female  = "female"
+	Other   = "other"
+	Unknown = "unknown"
 )
 
-func (g Gender) String() string {
-	switch g {
-	case Male:
-		return "male"
-	case Female:
-		return "female"
-	case Other:
-		return "other"
-	case Unknown:
-		return "unknown"
+// IsSupportedGender returns true if the provided gender is supported
+func IsSupportedGender(gender string) bool {
+	switch gender {
+	case Male, Female, Other, Unknown:
+		return true
 	}
-	return ""
+	return false
 }

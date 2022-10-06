@@ -72,7 +72,7 @@ type User struct {
 	Name      string     `json:"name"`
 	Surname   string     `json:"surname"`
 	CompanyID *int64     `json:"company_id"`
-	Password  string     `json:"password"`
+	Password  string     `json:"-"`
 	Gender    string     `json:"gender"`
 	BirthDate time.Time  `json:"birth_date"`
 	CreatedAt time.Time  `json:"created_at"`

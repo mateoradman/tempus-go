@@ -110,9 +110,9 @@ const listCompanyEmployees = `-- name: ListCompanyEmployees :many
 SELECT id, username, email, name, surname, company_id, password, gender, birth_date, created_at, updated_at, language, country, timezone, manager_id, team_id
 FROM users
 WHERE users.company_id =
-        (SELECT companies.id
-         FROM companies
-         WHERE companies.id = $1 LIMIT 1)
+    (SELECT companies.id
+    FROM companies
+    WHERE companies.id = $1)
 ORDER BY id
 LIMIT $2
 OFFSET $3

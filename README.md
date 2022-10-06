@@ -7,12 +7,11 @@ https://dbdiagram.io/d/633607277b3d2034ffee729b
 ## Tech stack
 
 ### Backend (API)
-- Golang
+- Go
 - Gin
-- sqlc
-- golang-migrate
 
 ### Frontend (client)
 - React
 - TailwindCSS
 - Typescript
+- Redux

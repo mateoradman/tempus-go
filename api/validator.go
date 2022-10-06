@@ -8,7 +8,7 @@ import (
 // validGender is a custom gender validator
 var validGender validator.Func = func(fl validator.FieldLevel) bool {
 	if gender, ok := fl.Field().Interface().(string); ok {
-		util.IsSupportedGender(gender)
+		return util.IsSupportedGender(gender)
 	}
 	return false
 }

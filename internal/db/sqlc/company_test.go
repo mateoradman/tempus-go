@@ -115,9 +115,9 @@ func TestListEmployee(t *testing.T) {
 		users = append(users, updatedUser)
 	}
 	arg := ListCompanyEmployeesParams{
-		ID: company.ID,
-		Limit:     100,
-		Offset:    0,
+		ID:     company.ID,
+		Limit:  100,
+		Offset: 0,
 	}
 	employees, err := testQueries.ListCompanyEmployees(context.Background(), arg)
 	require.NoError(t, err)

@@ -128,15 +128,6 @@ func (server *Server) listCompanyEmployees(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	if _, err := server.store.GetCompany(ctx, idReq.ID); err != nil {
-		// check if a company with a given ID exists.
-		if err == pgx.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return
-	}
 	if err := ctx.ShouldBindQuery(&queryReq); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return

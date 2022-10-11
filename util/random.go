@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"math/rand"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 func init() {
@@ -27,9 +29,7 @@ func RandomString(n int) string {
 }
 
 func RandomEmail() string {
-	username := RandomString(rand.Intn(100))
-	domain := RandomString(rand.Intn(100))
-	return fmt.Sprintf("%s@%s.com", username, domain)
+	return fmt.Sprintf("%s@%s.com", uuid.New().String(), uuid.New().String())
 }
 
 func RandomGender() string {

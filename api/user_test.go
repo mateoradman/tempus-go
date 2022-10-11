@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 	"time"
 
@@ -18,77 +19,127 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func requireBodyMatchCompany(t *testing.T, body *bytes.Buffer, company db.Company) {
+type eqCreateUserParamsMatcher struct {
+	arg      db.CreateUserParams
+	password string
+}
+
+func (e eqCreateUserParamsMatcher) Matches(x interface{}) bool {
+	arg, ok := x.(db.CreateUserParams)
+	if !ok {
+		return false
+	}
+
+	err := util.CheckPassword(e.password, arg.Password)
+	if err != nil {
+		return false
+	}
+
+	e.arg.Password = arg.Password
+	return reflect.DeepEqual(e.arg, arg)
+}
+
+func (e eqCreateUserParamsMatcher) String() string {
+	return fmt.Sprintf("matches arg %v and password %v", e.arg, e.password)
+}
+
+func EqCreateUserParams(arg db.CreateUserParams, password string) gomock.Matcher {
+	return eqCreateUserParamsMatcher{arg, password}
+}
+func requireBodyMatchUserList(t *testing.T, body *bytes.Buffer, users []db.User) {
 	data, err := io.ReadAll(body)
 	require.NoError(t, err)
 
-	var gotCompany db.Company
-	err = json.Unmarshal(data, &gotCompany)
+	var gotUsers []db.User
+	err = json.Unmarshal(data, &gotUsers)
 	require.NoError(t, err)
-	require.Equal(t, company, gotCompany)
+	require.Equal(t, users, gotUsers)
 }
 
-func requireBodyMatchCompanyList(t *testing.T, body *bytes.Buffer, companies []db.Company) {
+func requireBodyMatchUser(t *testing.T, body *bytes.Buffer, user db.User) {
 	data, err := io.ReadAll(body)
 	require.NoError(t, err)
 
-	var gotCompanies []db.Company
-	err = json.Unmarshal(data, &gotCompanies)
+	var gotUser db.User
+	err = json.Unmarshal(data, &gotUser)
 	require.NoError(t, err)
-	require.Equal(t, companies, gotCompanies)
-
+	require.Equal(t, user, gotUser)
 }
 
-func randomCompany() db.Company {
-	return db.Company{
+func randomUser() db.User {
+	return db.User{
 		ID:        util.RandomInt(1, 1000),
-		Name:      util.RandomString(100),
+		Name:      util.RandomString(5),
+		Username:  util.RandomString(5),
+		Surname:   util.RandomString(5),
+		Gender:    util.RandomGender(),
+		Email:     util.RandomEmail(),
 		CreatedAt: time.Now().UTC(),
+		BirthDate: time.Now().UTC(),
+		Language:  "en",
+		Country:   "GB",
 	}
 }
 
-func TestCreateCompanyAPI(t *testing.T) {
-	company := randomCompany()
+func TestCreateUserAPI(t *testing.T) {
+	user := randomUser()
+	password := util.RandomString(10)
+
+	arg := db.CreateUserParams{
+		Username:  user.Username,
+		Password:  password,
+		Email:     user.Email,
+		Name:      user.Name,
+		Surname:   user.Surname,
+		Gender:    user.Gender,
+		CompanyID: user.CompanyID,
+		BirthDate: user.BirthDate,
+		Language:  user.Language,
+		Country:   user.Country,
+		Timezone:  user.Timezone,
+		ManagerID: user.ManagerID,
+		TeamID:    user.TeamID,
+	}
 
 	testCases := []struct {
 		name          string
-		companyName   string
+		arg           db.CreateUserParams
 		buildStubs    func(store *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
-			name:        "OK",
-			companyName: company.Name,
+			name: "OK",
+			arg:  arg,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					CreateCompany(gomock.Any(), gomock.Eq(company.Name)).
+					CreateUser(gomock.Any(), EqCreateUserParams(arg, password)).
 					Times(1).
-					Return(company, nil)
+					Return(user, nil)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusCreated, recorder.Code)
-				requireBodyMatchCompany(t, recorder.Body, company)
+				requireBodyMatchUser(t, recorder.Body, user)
 			},
 		},
 		{
-			name:        "InternalServerError",
-			companyName: company.Name,
+			name: "InternalServerError",
+			arg:  arg,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					CreateCompany(gomock.Any(), gomock.Eq(company.Name)).
+					CreateUser(gomock.Any(), EqCreateUserParams(arg, password)).
 					Times(1).
-					Return(db.Company{}, pgx.ErrTxClosed)
+					Return(db.User{}, pgx.ErrTxClosed)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
 			},
 		},
 		{
-			name:        "BadRequest",
-			companyName: "",
+			name: "BadRequest",
+			arg:  db.CreateUserParams{},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					CreateCompany(gomock.Any(), gomock.Any()).
+					CreateUser(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -109,73 +160,75 @@ func TestCreateCompanyAPI(t *testing.T) {
 			server := NewServer(store)
 			recorder := httptest.NewRecorder()
 
-			jsonData := []byte(fmt.Sprintf(`{"name": "%s"}`, tc.companyName))
-			request, err := http.NewRequest(http.MethodPost, "/companies", bytes.NewBuffer(jsonData))
+			jsonData, err := json.Marshal(&tc.arg)
+			require.NoError(t, err)
+			request, err := http.NewRequest(http.MethodPost, "/users", bytes.NewBuffer(jsonData))
 			request.Header.Set("Content-Type", "application/json; charset=UTF-8")
 
 			require.NoError(t, err)
 
 			server.router.ServeHTTP(recorder, request)
+			fmt.Println(recorder.Body.String())
 			tc.checkResponse(t, recorder)
 		})
 	}
 }
 
-func TestGetCompanyAPI(t *testing.T) {
-	company := randomCompany()
+func TestGetUserAPI(t *testing.T) {
+	user := randomUser()
 
 	testCases := []struct {
 		name          string
-		companyID     int64
+		userID        int64
 		buildStubs    func(store *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
-			name:      "OK",
-			companyID: company.ID,
+			name:   "OK",
+			userID: user.ID,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					GetCompany(gomock.Any(), gomock.Eq(company.ID)).
+					GetUser(gomock.Any(), gomock.Eq(user.ID)).
 					Times(1).
-					Return(company, nil)
+					Return(user, nil)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
-				requireBodyMatchCompany(t, recorder.Body, company)
+				requireBodyMatchUser(t, recorder.Body, user)
 			},
 		},
 		{
-			name:      "NotFound",
-			companyID: company.ID,
+			name:   "NotFound",
+			userID: user.ID,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					GetCompany(gomock.Any(), gomock.Eq(company.ID)).
+					GetUser(gomock.Any(), gomock.Eq(user.ID)).
 					Times(1).
-					Return(db.Company{}, pgx.ErrNoRows)
+					Return(db.User{}, pgx.ErrNoRows)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)
 			},
 		},
 		{
-			name:      "InternalServerError",
-			companyID: company.ID,
+			name:   "InternalServerError",
+			userID: user.ID,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					GetCompany(gomock.Any(), gomock.Eq(company.ID)).
+					GetUser(gomock.Any(), gomock.Eq(user.ID)).
 					Times(1).
-					Return(db.Company{}, pgx.ErrTxClosed)
+					Return(db.User{}, pgx.ErrTxClosed)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
 			},
 		},
 		{
-			name:      "InvalidID",
-			companyID: 0,
+			name:   "InvalidID",
+			userID: 0,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					GetCompany(gomock.Any(), gomock.Any()).
+					GetUser(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -196,7 +249,7 @@ func TestGetCompanyAPI(t *testing.T) {
 			server := NewServer(store)
 			recorder := httptest.NewRecorder()
 
-			url := fmt.Sprintf("/companies/%d", tc.companyID)
+			url := fmt.Sprintf("/users/%d", tc.userID)
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 
@@ -207,61 +260,61 @@ func TestGetCompanyAPI(t *testing.T) {
 
 }
 
-func TestDeleteCompanyAPI(t *testing.T) {
-	company := randomCompany()
+func TestDeleteUserAPI(t *testing.T) {
+	user := randomUser()
 
 	testCases := []struct {
 		name          string
-		companyID     int64
+		userID        int64
 		buildStubs    func(store *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
-			name:      "OK",
-			companyID: company.ID,
+			name:   "OK",
+			userID: user.ID,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					DeleteCompany(gomock.Any(), gomock.Eq(company.ID)).
+					DeleteUser(gomock.Any(), gomock.Eq(user.ID)).
 					Times(1).
-					Return(company, nil)
+					Return(user, nil)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
-				requireBodyMatchCompany(t, recorder.Body, company)
+				requireBodyMatchUser(t, recorder.Body, user)
 			},
 		},
 		{
-			name:      "NotFound",
-			companyID: company.ID,
+			name:   "NotFound",
+			userID: user.ID,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					DeleteCompany(gomock.Any(), gomock.Eq(company.ID)).
+					DeleteUser(gomock.Any(), gomock.Eq(user.ID)).
 					Times(1).
-					Return(db.Company{}, pgx.ErrNoRows)
+					Return(db.User{}, pgx.ErrNoRows)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)
 			},
 		},
 		{
-			name:      "InternalServerError",
-			companyID: company.ID,
+			name:   "InternalServerError",
+			userID: user.ID,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					DeleteCompany(gomock.Any(), gomock.Eq(company.ID)).
+					DeleteUser(gomock.Any(), gomock.Eq(user.ID)).
 					Times(1).
-					Return(db.Company{}, pgx.ErrTxClosed)
+					Return(db.User{}, pgx.ErrTxClosed)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
 			},
 		},
 		{
-			name:      "InvalidID",
-			companyID: 0,
+			name:   "InvalidID",
+			userID: 0,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					DeleteCompany(gomock.Any(), gomock.Any()).
+					DeleteUser(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -282,7 +335,7 @@ func TestDeleteCompanyAPI(t *testing.T) {
 			server := NewServer(store)
 			recorder := httptest.NewRecorder()
 
-			url := fmt.Sprintf("/companies/%d", tc.companyID)
+			url := fmt.Sprintf("/users/%d", tc.userID)
 			request, err := http.NewRequest(http.MethodDelete, url, nil)
 			require.NoError(t, err)
 
@@ -293,70 +346,77 @@ func TestDeleteCompanyAPI(t *testing.T) {
 
 }
 
-func TestUpdateCompanyAPI(t *testing.T) {
-	company := randomCompany()
-	arg := db.UpdateCompanyParams{
-		Name: company.Name,
-		ID:   company.ID,
+func TestUpdateUserAPI(t *testing.T) {
+	user := randomUser()
+	arg := db.UpdateUserParams{
+		ID:        user.ID,
+		Username:  user.Username,
+		Email:     user.Email,
+		Name:      user.Name,
+		Surname:   user.Surname,
+		Gender:    user.Gender,
+		CompanyID: user.CompanyID,
+		BirthDate: user.BirthDate,
+		Language:  user.Language,
+		Country:   user.Country,
+		Timezone:  user.Timezone,
+		ManagerID: user.ManagerID,
+		TeamID:    user.TeamID,
 	}
 
 	testCases := []struct {
 		name          string
-		companyID     int64
-		companyName   string
+		userID        int64
+		arg           db.UpdateUserParams
 		buildStubs    func(store *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
-			name:        "OK",
-			companyID:   arg.ID,
-			companyName: arg.Name,
+			name:   "OK",
+			userID: arg.ID,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					UpdateCompany(gomock.Any(), gomock.Eq(arg)).
+					UpdateUser(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
-					Return(company, nil)
+					Return(user, nil)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
-				requireBodyMatchCompany(t, recorder.Body, company)
+				requireBodyMatchUser(t, recorder.Body, user)
 			},
 		},
 		{
-			name:        "NotFound",
-			companyID:   arg.ID,
-			companyName: arg.Name,
+			name:   "NotFound",
+			userID: arg.ID,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					UpdateCompany(gomock.Any(), gomock.Eq(arg)).
+					UpdateUser(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
-					Return(db.Company{}, pgx.ErrNoRows)
+					Return(db.User{}, pgx.ErrNoRows)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)
 			},
 		},
 		{
-			name:        "InternalServerError",
-			companyID:   arg.ID,
-			companyName: arg.Name,
+			name:   "InternalServerError",
+			userID: arg.ID,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					UpdateCompany(gomock.Any(), gomock.Eq(arg)).
+					UpdateUser(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
-					Return(db.Company{}, pgx.ErrTxClosed)
+					Return(db.User{}, pgx.ErrTxClosed)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
 			},
 		},
 		{
-			name:        "InvalidCompanyID",
-			companyID:   0,
-			companyName: arg.Name,
+			name:   "InvalidUserID",
+			userID: 0,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					UpdateCompany(gomock.Any(), gomock.Any()).
+					UpdateUser(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -364,12 +424,12 @@ func TestUpdateCompanyAPI(t *testing.T) {
 			},
 		},
 		{
-			name:        "InvalidCompanyName",
-			companyID:   arg.ID,
-			companyName: "",
+			name:   "InvalidUserName",
+			userID: arg.ID,
 			buildStubs: func(store *mockdb.MockStore) {
+				arg.Username = ""
 				store.EXPECT().
-					UpdateCompany(gomock.Any(), gomock.Any()).
+					UpdateUser(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -390,26 +450,28 @@ func TestUpdateCompanyAPI(t *testing.T) {
 			server := NewServer(store)
 			recorder := httptest.NewRecorder()
 
-			jsonData := []byte(fmt.Sprintf(`{"name": "%s"}`, tc.companyName))
-			url := fmt.Sprintf("/companies/%d", tc.companyID)
+			jsonData, err := json.Marshal(&arg)
+			require.NoError(t, err)
+			url := fmt.Sprintf("/users/%d", tc.userID)
 			request, err := http.NewRequest(http.MethodPut, url, bytes.NewBuffer(jsonData))
 			request.Header.Set("Content-Type", "application/json; charset=UTF-8")
 
 			require.NoError(t, err)
 
 			server.router.ServeHTTP(recorder, request)
+			fmt.Println(recorder.Body.String())
 			tc.checkResponse(t, recorder)
 		})
 	}
 }
 
-func TestListCompaniesAPI(t *testing.T) {
-	company := randomCompany()
-	arg := db.ListCompaniesParams{
+func TestListUsersAPI(t *testing.T) {
+	user := randomUser()
+	arg := db.ListUsersParams{
 		Offset: int32(util.RandomInt(0, 100000)),
 		Limit:  int32(util.RandomInt(1, 100)),
 	}
-	returnVal := []db.Company{company}
+	returnVal := []db.User{user}
 
 	testCases := []struct {
 		name          string
@@ -424,13 +486,13 @@ func TestListCompaniesAPI(t *testing.T) {
 			limit:  arg.Limit,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					ListCompanies(gomock.Any(), gomock.Eq(arg)).
+					ListUsers(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
 					Return(returnVal, nil)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
-				requireBodyMatchCompanyList(t, recorder.Body, returnVal)
+				requireBodyMatchUserList(t, recorder.Body, returnVal)
 			},
 		},
 		{
@@ -439,7 +501,7 @@ func TestListCompaniesAPI(t *testing.T) {
 			limit:  arg.Limit,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					ListCompanies(gomock.Any(), gomock.Eq(arg)).
+					ListUsers(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
 					Return(returnVal, pgx.ErrTxClosed)
 			},
@@ -453,7 +515,7 @@ func TestListCompaniesAPI(t *testing.T) {
 			offset: -1,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					ListCompanies(gomock.Any(), gomock.Any()).
+					ListUsers(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -466,7 +528,7 @@ func TestListCompaniesAPI(t *testing.T) {
 			limit:  1000,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					ListCompanies(gomock.Any(), gomock.Any()).
+					ListUsers(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
@@ -487,129 +549,7 @@ func TestListCompaniesAPI(t *testing.T) {
 			server := NewServer(store)
 			recorder := httptest.NewRecorder()
 
-			request, err := http.NewRequest(http.MethodGet, "/companies", nil)
-			request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-			q := request.URL.Query()
-			q.Set("offset", fmt.Sprintf("%d", tc.offset))
-			q.Set("limit", fmt.Sprintf("%d", tc.limit))
-			request.URL.RawQuery = q.Encode()
-
-			require.NoError(t, err)
-
-			server.router.ServeHTTP(recorder, request)
-			tc.checkResponse(t, recorder)
-		})
-	}
-
-}
-
-func TestListCompanyEmployeesAPI(t *testing.T) {
-	company := randomCompany()
-	arg := db.ListCompanyEmployeesParams{
-		ID:     company.ID,
-		Offset: int32(util.RandomInt(0, 100000)),
-		Limit:  int32(util.RandomInt(1, 100)),
-	}
-	user := randomUser()
-	returnVal := []db.User{user}
-
-	testCases := []struct {
-		name          string
-		companyID     int64
-		offset        int32
-		limit         int32
-		buildStubs    func(store *mockdb.MockStore)
-		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
-	}{
-		{
-			name:      "OK",
-			companyID: company.ID,
-			offset:    arg.Offset,
-			limit:     arg.Limit,
-			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().
-					ListCompanyEmployees(gomock.Any(), gomock.Eq(arg)).
-					Times(1).
-					Return(returnVal, nil)
-			},
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusOK, recorder.Code)
-				requireBodyMatchUserList(t, recorder.Body, returnVal)
-			},
-		},
-		{
-			name:      "InternalServerError",
-			companyID: company.ID,
-			offset:    arg.Offset,
-			limit:     arg.Limit,
-			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().
-					ListCompanyEmployees(gomock.Any(), gomock.Eq(arg)).
-					Times(1).
-					Return(returnVal, pgx.ErrTxClosed)
-			},
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusInternalServerError, recorder.Code)
-			},
-		},
-		{
-			name:      "InvalidOffset",
-			companyID: company.ID,
-			limit:     arg.Limit,
-			offset:    -1,
-			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().
-					ListCompanyEmployees(gomock.Any(), gomock.Any()).
-					Times(0)
-			},
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusBadRequest, recorder.Code)
-			},
-		},
-		{
-			name:      "InvalidLimit",
-			companyID: company.ID,
-			offset:    arg.Offset,
-			limit:     1000,
-			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().
-					ListCompanyEmployees(gomock.Any(), gomock.Any()).
-					Times(0)
-			},
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusBadRequest, recorder.Code)
-			},
-		},
-		{
-			name:      "InvalidCompanyID",
-			companyID: 0,
-			offset:    arg.Offset,
-			limit:     arg.Limit,
-			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().
-					ListCompanyEmployees(gomock.Any(), gomock.Any()).
-					Times(0)
-			},
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusBadRequest, recorder.Code)
-			},
-		},
-	}
-
-	for i := range testCases {
-		tc := testCases[i]
-		t.Run(tc.name, func(t *testing.T) {
-			ctrl := gomock.NewController(t)
-			defer ctrl.Finish()
-
-			store := mockdb.NewMockStore(ctrl)
-			tc.buildStubs(store)
-
-			server := NewServer(store)
-			recorder := httptest.NewRecorder()
-
-			url := fmt.Sprintf("/companies/%d/employees", tc.companyID)
-			request, err := http.NewRequest(http.MethodGet, url, nil)
+			request, err := http.NewRequest(http.MethodGet, "/users", nil)
 			request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 			q := request.URL.Query()
 			q.Set("offset", fmt.Sprintf("%d", tc.offset))

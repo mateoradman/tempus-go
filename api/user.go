@@ -10,9 +10,11 @@ import (
 	"github.com/mateoradman/tempus/util"
 )
 
+type PasswordRequest struct {
+	Password  string     `json:"password" binding:"required,min=6"`
+}
 type UserRequest struct {
 	Username  string     `json:"username" binding:"required,alphanum"`
-	Password  string     `json:"password" binding:"required,min=6"`
 	Name      string     `json:"name" binding:"required,min=1"`
 	Surname   string     `json:"surname" binding:"required,min=1"`
 	Email     string     `json:"email" binding:"required,email"`
@@ -26,8 +28,13 @@ type UserRequest struct {
 	TeamID    *int64     `json:"team_id"`
 }
 
+type createUserRequest struct {
+	PasswordRequest
+	UserRequest
+}
+
 func (server *Server) createUser(ctx *gin.Context) {
-	var req UserRequest
+	var req createUserRequest
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))

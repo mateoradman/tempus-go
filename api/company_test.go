@@ -106,7 +106,7 @@ func TestCreateCompanyAPI(t *testing.T) {
 			store := mockdb.NewMockStore(ctrl)
 			tc.buildStubs(store)
 
-			server := NewServer(store)
+			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
 			jsonData := []byte(fmt.Sprintf(`{"name": "%s"}`, tc.companyName))
@@ -193,7 +193,7 @@ func TestGetCompanyAPI(t *testing.T) {
 			store := mockdb.NewMockStore(ctrl)
 			tc.buildStubs(store)
 
-			server := NewServer(store)
+			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
 			url := fmt.Sprintf("/companies/%d", tc.companyID)
@@ -279,7 +279,7 @@ func TestDeleteCompanyAPI(t *testing.T) {
 			store := mockdb.NewMockStore(ctrl)
 			tc.buildStubs(store)
 
-			server := NewServer(store)
+			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
 			url := fmt.Sprintf("/companies/%d", tc.companyID)
@@ -387,7 +387,7 @@ func TestUpdateCompanyAPI(t *testing.T) {
 			store := mockdb.NewMockStore(ctrl)
 			tc.buildStubs(store)
 
-			server := NewServer(store)
+			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
 			jsonData := []byte(fmt.Sprintf(`{"name": "%s"}`, tc.companyName))
@@ -484,7 +484,7 @@ func TestListCompaniesAPI(t *testing.T) {
 			store := mockdb.NewMockStore(ctrl)
 			tc.buildStubs(store)
 
-			server := NewServer(store)
+			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
 			request, err := http.NewRequest(http.MethodGet, "/companies", nil)
@@ -605,7 +605,7 @@ func TestListCompanyEmployeesAPI(t *testing.T) {
 			store := mockdb.NewMockStore(ctrl)
 			tc.buildStubs(store)
 
-			server := NewServer(store)
+			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
 			url := fmt.Sprintf("/companies/%d/employees", tc.companyID)

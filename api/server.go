@@ -30,11 +30,17 @@ func NewServer(config util.Config, store db.Store) (*Server, error) {
 		store:      store,
 		tokenMaker: tokenMaker,
 	}
-	router := gin.Default()
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterValidation("gender", validGender)
 	}
+
+	server.setupRouter()
+	return server, nil
+}
+
+func (server *Server) setupRouter() {
+	router := gin.Default()
 
 	router.POST("/companies", server.createCompany)
 	router.GET("/companies/:id", server.getCompany)
@@ -47,10 +53,10 @@ func NewServer(config util.Config, store db.Store) (*Server, error) {
 	router.GET("/users/:id", server.getUser)
 	router.DELETE("/users/:id", server.deleteUser)
 	router.PUT("/users/:id", server.updateUser)
-	router.GET("/users", server.listUser)
+	router.GET("/users", server.listUsers)
+	router.POST("/users/login", server.loginUser)
 
 	server.router = router
-	return server, nil
 }
 
 // Start runs a server on a given address.

@@ -42,19 +42,23 @@ func NewServer(config util.Config, store db.Store) (*Server, error) {
 func (server *Server) setupRouter() {
 	router := gin.Default()
 
-	router.POST("/companies", server.createCompany)
-	router.GET("/companies/:id", server.getCompany)
-	router.DELETE("/companies/:id", server.deleteCompany)
-	router.PUT("/companies/:id", server.updateCompany)
-	router.GET("/companies", server.listCompany)
-	router.GET("/companies/:id/employees", server.listCompanyEmployees)
-
+	// routes not protected by auth middleware
 	router.POST("/users", server.createUser)
-	router.GET("/users/:id", server.getUser)
-	router.DELETE("/users/:id", server.deleteUser)
-	router.PUT("/users/:id", server.updateUser)
-	router.GET("/users", server.listUsers)
 	router.POST("/users/login", server.loginUser)
+
+	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
+
+	authRoutes.POST("/companies", server.createCompany)
+	authRoutes.GET("/companies/:id", server.getCompany)
+	authRoutes.DELETE("/companies/:id", server.deleteCompany)
+	authRoutes.PUT("/companies/:id", server.updateCompany)
+	authRoutes.GET("/companies", server.listCompany)
+	authRoutes.GET("/companies/:id/employees", server.listCompanyEmployees)
+
+	authRoutes.GET("/users/:id", server.getUser)
+	authRoutes.DELETE("/users/:id", server.deleteUser)
+	authRoutes.PUT("/users/:id", server.updateUser)
+	authRoutes.GET("/users", server.listUsers)
 
 	server.router = router
 }

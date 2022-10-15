@@ -1,0 +1,119 @@
+
+Project tempus {
+    database_type: 'PostgreSQL'
+}
+
+Table teams {
+  id bigserial [pk]
+  name varchar(255) [not null]
+  manager_id bigint [ref: - users.id, default: null]
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp [default: null]
+  
+  indexes {
+    id
+    manager_id
+  }
+}
+
+Table users {
+  id bigserial [pk]
+  username varchar(255) [unique, not null]
+  email varchar(255) [unique, not null]
+  name varchar(255) [not null]
+  surname varchar(255) [not null]
+  company_id bigint [default: null]
+  password varchar(255) [not null]
+  gender varchar(255) [not null]
+  birth_date date [not null]
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp [default: null]
+  language varchar(2) [not null, default: 'en', note: 'ISO-2 language code']
+  country varchar(2) [not null, note: 'ISO-2 Country code']
+  timezone varchar(255)
+  manager_id bigint [ref: - users.id, default: null]
+  team_id bigint [ref: > teams.id, default: null]
+  
+  indexes {
+    email
+    username
+    manager_id
+    team_id
+  }
+}
+
+Table roles {
+  id bigserial [pk]
+  name varchar(255) [not null, unique]
+  description varchar [not null]
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp [default: null]
+  
+  indexes {
+    name
+  }
+}
+
+Table permissions {
+  id bigserial [pk]
+  name varchar(255) [not null, unique]
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp [default: null]
+  
+  indexes {
+    name
+  }
+}
+
+Table absences {
+  id bigserial [pk] // auto-increment
+  user_id bigint [not null] 
+  reason varchar(255) [not null]
+  paid boolean [not null, default: true]
+  date date [not null]
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp [default: null]
+  approved_by_id bigint [ref: > users.id, default: null]
+  length float [not null, note: 'length in hours and minutes as float']
+  indexes {
+    user_id
+  }
+}
+
+
+Table entries {
+  id bigserial [pk]
+  user_id bigint [not null] 
+  start timestamp [not null, default: `now()`]
+  end timestamp [default: null]
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp [default: null]
+  date date [not null, default: `now()`]
+  indexes {
+    user_id
+  }
+}
+
+Table companies {
+  id bigint [pk, increment, ref: < users.company_id]
+  name varchar(255) [not null]
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp [default: null]
+}
+
+Table sessions {
+  id uuid [pk]
+  username varchar [not null]
+  refresh_token varchar [not null]
+  user_agent varchar [not null]
+  client_ip varchar [not null]
+  is_blocked boolean [not null]
+  expires_at timestamp [not null]
+  created_at timestamp [not null, default: `now()`]
+}
+
+Ref user_entries: users.id < entries.user_id [delete: cascade]
+Ref user_absences: users.id < absences.user_id [delete: cascade]
+Ref users_roles: users.id <> roles.id
+Ref roles_permissions: roles.id <> permissions.id 
+Ref user_sessions: users.username < sessions.username [delete: cascade]

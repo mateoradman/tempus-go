@@ -2,7 +2,6 @@ package token
 
 import "time"
 
-
 // Maker is an interface for managing tokens
 type Maker interface {
 	// CreateToken generates a new token for a specific username valid for a specific duration of time

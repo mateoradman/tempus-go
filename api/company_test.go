@@ -607,9 +607,9 @@ func TestListCompaniesAPI(t *testing.T) {
 			},
 		},
 		{
-			name:      "Unauthorized",
-			offset:    arg.Offset,
-			limit:     arg.Limit,
+			name:   "Unauthorized",
+			offset: arg.Offset,
+			limit:  arg.Limit,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
 					ListCompanies(gomock.Any(), gomock.Any()).
@@ -645,7 +645,6 @@ func TestListCompaniesAPI(t *testing.T) {
 			q.Set("offset", fmt.Sprintf("%d", tc.offset))
 			q.Set("limit", fmt.Sprintf("%d", tc.limit))
 			request.URL.RawQuery = q.Encode()
-
 
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(t, recorder)

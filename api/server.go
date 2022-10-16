@@ -45,6 +45,7 @@ func (server *Server) setupRouter() {
 	// routes not protected by auth middleware
 	router.POST("/users", server.createUser)
 	router.POST("/users/login", server.loginUser)
+	router.POST("/tokens/refresh", server.refreshToken)
 
 	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
 

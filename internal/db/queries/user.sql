@@ -46,19 +46,13 @@ OFFSET $2;
 -- name: UpdateUser :one
 UPDATE users
 SET 
-username = $2,
-email = $3,
-name = $4,
-surname = $5,
-company_id = $6,
-gender = $7,
-birth_date = $8,
-language = $9,
-country = $10,
-timezone = $11,
-manager_id = $12,
-team_id = $13
-WHERE id = $1
+name = COALESCE(sqlc.narg(name), name),
+surname = COALESCE(sqlc.narg(surname), surname),
+gender = COALESCE(sqlc.narg(gender), gender),
+birth_date = COALESCE(sqlc.narg(birth_date)::timestamp, birth_date),
+language = COALESCE(sqlc.narg(language), language),
+country = COALESCE(sqlc.narg(country), country)
+WHERE id = sqlc.arg(id)
 RETURNING *;
 
 -- name: DeleteUser :one

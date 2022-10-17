@@ -262,53 +262,35 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 const updateUser = `-- name: UpdateUser :one
 UPDATE users
 SET 
-username = $2,
-email = $3,
-name = $4,
-surname = $5,
-company_id = $6,
-gender = $7,
-birth_date = $8,
-language = $9,
-country = $10,
-timezone = $11,
-manager_id = $12,
-team_id = $13
-WHERE id = $1
+name = COALESCE($1, name),
+surname = COALESCE($2, surname),
+gender = COALESCE($3, gender),
+birth_date = COALESCE($4::timestamp, birth_date),
+language = COALESCE($5, language),
+country = COALESCE($6, country)
+WHERE id = $7
 RETURNING id, username, email, name, surname, company_id, password, gender, birth_date, created_at, updated_at, language, country, timezone, manager_id, team_id
 `
 
 type UpdateUserParams struct {
-	ID        int64     `json:"id"`
-	Username  string    `json:"username"`
-	Email     string    `json:"email"`
-	Name      string    `json:"name"`
-	Surname   string    `json:"surname"`
-	CompanyID *int64    `json:"company_id"`
-	Gender    string    `json:"gender"`
-	BirthDate time.Time `json:"birth_date"`
-	Language  string    `json:"language"`
-	Country   string    `json:"country"`
-	Timezone  *string   `json:"timezone"`
-	ManagerID *int64    `json:"manager_id"`
-	TeamID    *int64    `json:"team_id"`
+	Name      *string    `json:"name"`
+	Surname   *string    `json:"surname"`
+	Gender    *string    `json:"gender"`
+	BirthDate *time.Time `json:"birth_date"`
+	Language  *string    `json:"language"`
+	Country   *string    `json:"country"`
+	ID        int64      `json:"id"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
 	row := q.db.QueryRow(ctx, updateUser,
-		arg.ID,
-		arg.Username,
-		arg.Email,
 		arg.Name,
 		arg.Surname,
-		arg.CompanyID,
 		arg.Gender,
 		arg.BirthDate,
 		arg.Language,
 		arg.Country,
-		arg.Timezone,
-		arg.ManagerID,
-		arg.TeamID,
+		arg.ID,
 	)
 	var i User
 	err := row.Scan(

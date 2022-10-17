@@ -9,7 +9,7 @@ import (
 )
 
 func createRandomEntry(t *testing.T) Entry {
-	user := createRandomUser(t)
+	user := createRandomUser(t, nil, nil)
 
 	today := time.Now().UTC()
 	arg := CreateEntryParams{
@@ -54,7 +54,7 @@ func TestGetEntry(t *testing.T) {
 
 func TestUpdateEntry(t *testing.T) {
 	entry := createRandomEntry(t)
-	user := createRandomUser(t)
+	user := createRandomUser(t, nil, nil)
 	arg := UpdateEntryParams{
 		ID:        entry.ID,
 		UserID:    user.ID,
@@ -109,7 +109,7 @@ func TestListEntries(t *testing.T) {
 }
 
 func TestListUserEntries(t *testing.T) {
-	user := createRandomUser(t)
+	user := createRandomUser(t, nil, nil)
 	var entries []Entry
 	for i := 0; i < 10; i++ {
 		today := time.Now().UTC()

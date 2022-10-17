@@ -8,12 +8,12 @@ import (
 	db "github.com/mateoradman/tempus/internal/db/sqlc"
 )
 
-type createCompanyRequest struct {
+type CompanyRequest struct {
 	Name string `json:"name" binding:"required,min=1"`
 }
 
 func (server *Server) createCompany(ctx *gin.Context) {
-	var req createCompanyRequest
+	var req CompanyRequest
 	err := ctx.ShouldBindJSON(&req)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
@@ -73,7 +73,7 @@ func (server *Server) deleteCompany(ctx *gin.Context) {
 
 func (server *Server) updateCompany(ctx *gin.Context) {
 	var reqID RequestWithID
-	var reqName createCompanyRequest
+	var reqName CompanyRequest
 	if err := ctx.ShouldBindUri(&reqID); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return

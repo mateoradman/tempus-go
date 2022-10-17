@@ -58,7 +58,7 @@ func (server *Server) setupRouter() {
 
 	authRoutes.GET("/users/:id", server.getUser)
 	authRoutes.DELETE("/users/:id", server.deleteUser)
-	authRoutes.PUT("/users/:id", server.updateUser)
+	authRoutes.PATCH("/users/:id", server.updateUser)
 	authRoutes.GET("/users", server.listUsers)
 
 	server.router = router

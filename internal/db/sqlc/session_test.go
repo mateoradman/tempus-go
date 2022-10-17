@@ -11,7 +11,7 @@ import (
 )
 
 func createRandomSession(t *testing.T) Session {
-	user := createRandomUser(t)
+	user := createRandomUser(t, nil, nil)
 	arg := CreateSessionParams{
 		ID:           uuid.New(),
 		Username:     user.Username,

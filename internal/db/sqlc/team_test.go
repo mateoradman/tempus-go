@@ -10,7 +10,7 @@ import (
 )
 
 func createRandomTeam(t *testing.T) Team {
-	user := createRandomUser(t)
+	user := createRandomUser(t, nil, nil)
 	arg := CreateTeamParams{
 		Name:      util.RandomString(100),
 		ManagerID: &user.ID,
@@ -46,7 +46,7 @@ func TestGetTeam(t *testing.T) {
 
 func TestUpdateTeam(t *testing.T) {
 	team := createRandomTeam(t)
-	manager := createRandomUser(t)
+	manager := createRandomUser(t, nil, nil)
 	expectedLen := 25
 	name := util.RandomString(expectedLen)
 	arg := UpdateTeamParams{
@@ -103,25 +103,8 @@ func TestListTeamMembers(t *testing.T) {
 	users := []User{}
 	team := createRandomTeam(t)
 	for i := 0; i < 10; i++ {
-		user := createRandomUser(t)
-		arg := UpdateUserParams{
-			ID:        user.ID,
-			Username:  user.Username,
-			Email:     user.Email,
-			Name:      user.Name,
-			Surname:   user.Surname,
-			TeamID:    &team.ID,
-			Gender:    user.Gender,
-			BirthDate: user.BirthDate,
-			Language:  user.Language,
-			Country:   user.Country,
-			Timezone:  user.Timezone,
-			ManagerID: user.ManagerID,
-			CompanyID: user.CompanyID,
-		}
-		updatedUser, err := testQueries.UpdateUser(context.Background(), arg)
-		require.NoError(t, err)
-		users = append(users, updatedUser)
+		user := createRandomUser(t, nil, &team.ID)
+		users = append(users, user)
 	}
 	arg := ListTeamMembersParams{
 		TeamID: &team.ID,

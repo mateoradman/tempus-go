@@ -110,9 +110,18 @@ func (server *Server) deleteUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, user)
 }
 
+type updateUserRequest struct {
+	Name      *string    `json:"name,omitempty" binding:"omitempty,min=1"`
+	Surname   *string    `json:"surname,omitempty" binding:"omitempty,min=1"`
+	Gender    *string    `json:"gender,omitempty" binding:"omitempty,gender"`
+	BirthDate *time.Time `json:"birth_date,omitempty" binding:"omitempty,lt"`
+	Language  *string    `json:"language,omitempty" binding:"omitempty,len=2,ascii"`
+	Country   *string    `json:"country,omitempty" binding:"omitempty,len=2,ascii"`
+}
+
 func (server *Server) updateUser(ctx *gin.Context) {
 	var reqID RequestWithID
-	var req UserRequest
+	var req updateUserRequest
 	if err := ctx.ShouldBindUri(&reqID); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -122,27 +131,27 @@ func (server *Server) updateUser(ctx *gin.Context) {
 		return
 	}
 
-	arg := db.UpdateUserParams{
-		ID:        reqID.ID,
-		Username:  req.Username,
-		Email:     req.Email,
-		Name:      req.Name,
-		Surname:   req.Surname,
-		CompanyID: req.CompanyID,
-		Gender:    req.Gender,
-		BirthDate: *req.BirthDate,
-		Language:  req.Language,
-		Country:   req.Country,
-		Timezone:  req.Timezone,
-		ManagerID: req.ManagerID,
-		TeamID:    req.TeamID,
-	}
-	user, err := server.store.UpdateUser(ctx, arg)
+	user, err := server.store.GetUser(ctx, reqID.ID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	arg := db.UpdateUserParams{
+		ID:        user.ID,
+		Name:      req.Name,
+		Surname:   req.Surname,
+		Gender:    req.Gender,
+		BirthDate: req.BirthDate,
+		Language:  req.Language,
+		Country:   req.Country,
+	}
+	user, err = server.store.UpdateUser(ctx, arg)
+	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
@@ -201,6 +210,7 @@ func (server *Server) loginUser(ctx *gin.Context) {
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return

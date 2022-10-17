@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func createRandomUser(t *testing.T) User {
+func createRandomUser(t *testing.T, company_id, team_id *int64) User {
 	birthDate := time.Date(1999, 2, 3, 0, 0, 0, 0, time.Now().UTC().Location())
 	hashedPassword, err := util.HashPassword(util.RandomString(20))
 	require.NoError(t, err)
@@ -24,6 +24,8 @@ func createRandomUser(t *testing.T) User {
 		BirthDate: birthDate,
 		Language:  "hr",
 		Country:   "HR",
+		CompanyID: company_id,
+		TeamID:    team_id,
 	}
 
 	user, err := testQueries.CreateUser(context.Background(), arg)
@@ -42,10 +44,10 @@ func createRandomUser(t *testing.T) User {
 
 	// test if default values were correctly set
 	require.Nil(t, user.UpdatedAt)
-	require.Nil(t, user.CompanyID)
 	require.Nil(t, user.Timezone)
 	require.Nil(t, user.ManagerID)
-	require.Nil(t, user.TeamID)
+	require.Equal(t, user.CompanyID, company_id)
+	require.Equal(t, user.TeamID, team_id)
 
 	return user
 }
@@ -70,66 +72,54 @@ func validateGetQuery(t *testing.T, user, gotUser User) {
 }
 
 func TestCreateUser(t *testing.T) {
-	createRandomUser(t)
+	createRandomUser(t, nil, nil)
 }
 
 func TestGetUser(t *testing.T) {
-	user := createRandomUser(t)
+	user := createRandomUser(t, nil, nil)
 	gotUser, err := testQueries.GetUser(context.Background(), user.ID)
 	require.NoError(t, err)
 	validateGetQuery(t, user, gotUser)
 }
 
 func TestGetUserByEmail(t *testing.T) {
-	user := createRandomUser(t)
+	user := createRandomUser(t, nil, nil)
 	gotUser, err := testQueries.GetUserByEmail(context.Background(), user.Email)
 	require.NoError(t, err)
 	validateGetQuery(t, user, gotUser)
 }
 
 func TestGetUserByUsername(t *testing.T) {
-	user := createRandomUser(t)
+	user := createRandomUser(t, nil, nil)
 	gotUser, err := testQueries.GetUserByUsername(context.Background(), user.Username)
 	require.NoError(t, err)
 	validateGetQuery(t, user, gotUser)
 }
 
 func TestUpdateUser(t *testing.T) {
-	user := createRandomUser(t)
-	manager := createRandomUser(t)
+	user := createRandomUser(t, nil, nil)
 	expectedLen := 25
+	randomString := util.RandomString(expectedLen)
 	arg := UpdateUserParams{
 		ID:        user.ID,
-		Username:  user.Username,
-		Email:     user.Email,
-		Name:      util.RandomString(expectedLen),
-		Surname:   util.RandomString(expectedLen),
-		CompanyID: user.CompanyID,
-		Gender:    user.Gender,
-		BirthDate: user.BirthDate,
-		Language:  user.Language,
-		Country:   user.Country,
-		Timezone:  user.Timezone,
-		ManagerID: manager.ManagerID,
-		TeamID:    user.TeamID,
+		Name:      &randomString,
+		Surname:   &randomString,
+		Gender:    &user.Gender,
+		BirthDate: &user.BirthDate,
+		Language:  &user.Language,
+		Country:   &user.Country,
 	}
 
 	updatedUser, err := testQueries.UpdateUser(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, updatedUser)
 	require.Equal(t, arg.ID, updatedUser.ID)
-	require.Equal(t, arg.Username, updatedUser.Username)
-	require.Equal(t, arg.Email, updatedUser.Email)
-	require.Equal(t, arg.Name, updatedUser.Name)
-	require.Equal(t, arg.Surname, updatedUser.Surname)
-	require.Equal(t, arg.CompanyID, updatedUser.CompanyID)
-	require.Equal(t, arg.Gender, updatedUser.Gender)
-	require.Equal(t, arg.BirthDate, updatedUser.BirthDate)
-	require.Equal(t, arg.Language, updatedUser.Language)
-	require.Equal(t, arg.Country, updatedUser.Country)
-	require.Equal(t, arg.Timezone, updatedUser.Timezone)
-	require.Equal(t, arg.ManagerID, updatedUser.ManagerID)
-	require.Equal(t, arg.TeamID, updatedUser.TeamID)
+	require.Equal(t, *arg.Name, updatedUser.Name)
+	require.Equal(t, *arg.Surname, updatedUser.Surname)
+	require.Equal(t, *arg.Gender, updatedUser.Gender)
+	require.Equal(t, *arg.BirthDate, updatedUser.BirthDate)
+	require.Equal(t, *arg.Language, updatedUser.Language)
+	require.Equal(t, *arg.Country, updatedUser.Country)
 
 	// validate times remain unchanged
 	require.Equal(t, user.CreatedAt, updatedUser.CreatedAt)
@@ -138,7 +128,7 @@ func TestUpdateUser(t *testing.T) {
 }
 
 func TestDeleteUser(t *testing.T) {
-	user := createRandomUser(t)
+	user := createRandomUser(t, nil, nil)
 	deletedUser, err := testQueries.DeleteUser(context.Background(), user.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, deletedUser)
@@ -154,7 +144,7 @@ func TestDeleteUser(t *testing.T) {
 func TestListUsers(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		// Create 10 users
-		createRandomUser(t)
+		createRandomUser(t, nil, nil)
 	}
 
 	arg := ListUsersParams{

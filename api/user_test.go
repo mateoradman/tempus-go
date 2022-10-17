@@ -533,18 +533,12 @@ func TestUpdateUserAPI(t *testing.T) {
 	user := randomUser()
 	arg := db.UpdateUserParams{
 		ID:        user.ID,
-		Username:  user.Username,
-		Email:     user.Email,
-		Name:      user.Name,
-		Surname:   user.Surname,
-		Gender:    user.Gender,
-		CompanyID: user.CompanyID,
-		BirthDate: user.BirthDate,
-		Language:  user.Language,
-		Country:   user.Country,
-		Timezone:  user.Timezone,
-		ManagerID: user.ManagerID,
-		TeamID:    user.TeamID,
+		Name:      &user.Name,
+		Surname:   &user.Surname,
+		Gender:    &user.Gender,
+		BirthDate: &user.BirthDate,
+		Language:  &user.Language,
+		Country:   &user.Country,
 	}
 
 	testCases := []struct {
@@ -558,7 +552,12 @@ func TestUpdateUserAPI(t *testing.T) {
 		{
 			name:   "OK",
 			userID: arg.ID,
+			arg: arg,
 			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetUser(gomock.Any(), gomock.Eq(user.ID)).
+					Times(1).
+					Return(user, nil)
 				store.EXPECT().
 					UpdateUser(gomock.Any(), gomock.Eq(arg)).
 					Times(1).
@@ -575,11 +574,15 @@ func TestUpdateUserAPI(t *testing.T) {
 		{
 			name:   "NotFound",
 			userID: arg.ID,
+			arg: arg,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					UpdateUser(gomock.Any(), gomock.Eq(arg)).
+					GetUser(gomock.Any(), gomock.Eq(user.ID)).
 					Times(1).
 					Return(db.User{}, pgx.ErrNoRows)
+				store.EXPECT().
+					UpdateUser(gomock.Any(), gomock.Eq(arg)).
+					Times(0)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
@@ -591,11 +594,15 @@ func TestUpdateUserAPI(t *testing.T) {
 		{
 			name:   "InternalServerError",
 			userID: arg.ID,
+			arg: arg,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					UpdateUser(gomock.Any(), gomock.Eq(arg)).
+					GetUser(gomock.Any(), gomock.Eq(user.ID)).
 					Times(1).
 					Return(db.User{}, pgx.ErrTxClosed)
+				store.EXPECT().
+					UpdateUser(gomock.Any(), gomock.Eq(arg)).
+					Times(0)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
@@ -607,23 +614,11 @@ func TestUpdateUserAPI(t *testing.T) {
 		{
 			name:   "InvalidUserID",
 			userID: 0,
+			arg: arg,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					UpdateUser(gomock.Any(), gomock.Any()).
+					GetUser(gomock.Any(), gomock.Any()).
 					Times(0)
-			},
-			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
-			},
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusBadRequest, recorder.Code)
-			},
-		},
-		{
-			name:   "InvalidUserName",
-			userID: arg.ID,
-			buildStubs: func(store *mockdb.MockStore) {
-				arg.Username = ""
 				store.EXPECT().
 					UpdateUser(gomock.Any(), gomock.Any()).
 					Times(0)
@@ -638,7 +633,11 @@ func TestUpdateUserAPI(t *testing.T) {
 		{
 			name:   "Unauthorized",
 			userID: arg.ID,
+			arg: arg,
 			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetUser(gomock.Any(), gomock.Any()).
+					Times(0)
 				store.EXPECT().
 					UpdateUser(gomock.Any(), gomock.Any()).
 					Times(0)
@@ -663,16 +662,17 @@ func TestUpdateUserAPI(t *testing.T) {
 			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
-			jsonData, err := json.Marshal(&arg)
+			jsonData, err := json.Marshal(&tc.arg)
 			require.NoError(t, err)
 			url := fmt.Sprintf("/users/%d", tc.userID)
-			request, err := http.NewRequest(http.MethodPut, url, bytes.NewBuffer(jsonData))
+			request, err := http.NewRequest(http.MethodPatch, url, bytes.NewBuffer(jsonData))
 			require.NoError(t, err)
 
 			request.Header.Set("Content-Type", "application/json; charset=UTF-8")
 			tc.setupAuth(t, request, server.tokenMaker)
 
 			server.router.ServeHTTP(recorder, request)
+			fmt.Println(recorder.Body.String())
 			tc.checkResponse(t, recorder)
 		})
 	}

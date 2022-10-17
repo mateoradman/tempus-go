@@ -9,7 +9,7 @@ import (
 )
 
 func createRandomAbsence(t *testing.T) Absence {
-	user := createRandomUser(t)
+	user := createRandomUser(t, nil, nil)
 
 	today := time.Now().UTC()
 	arg := CreateAbsenceParams{
@@ -57,7 +57,7 @@ func TestGetAbsence(t *testing.T) {
 
 func TestUpdateAbsence(t *testing.T) {
 	absence := createRandomAbsence(t)
-	user := createRandomUser(t)
+	user := createRandomUser(t, nil, nil)
 	today := time.Now().UTC()
 	arg := UpdateAbsenceParams{
 		ID:     absence.ID,
@@ -117,7 +117,7 @@ func TestListAbsences(t *testing.T) {
 }
 
 func TestListUserAbsences(t *testing.T) {
-	user := createRandomUser(t)
+	user := createRandomUser(t, nil, nil)
 	var absences []Absence
 	for i := 0; i < 10; i++ {
 		today := time.Now().UTC()

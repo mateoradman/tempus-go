@@ -94,21 +94,15 @@ func TestListEmployee(t *testing.T) {
 	users := []User{}
 	company := createRandomCompany(t)
 	for i := 0; i < 10; i++ {
-		user := createRandomUser(t)
+		user := createRandomUser(t, &company.ID, nil)
 		arg := UpdateUserParams{
 			ID:        user.ID,
-			Username:  user.Username,
-			Email:     user.Email,
-			Name:      user.Name,
-			Surname:   user.Surname,
-			CompanyID: &company.ID,
-			Gender:    user.Gender,
-			BirthDate: user.BirthDate,
-			Language:  user.Language,
-			Country:   user.Country,
-			Timezone:  user.Timezone,
-			ManagerID: user.ManagerID,
-			TeamID:    user.TeamID,
+			Name:      &user.Name,
+			Surname:   &user.Surname,
+			Gender:    &user.Gender,
+			BirthDate: &user.BirthDate,
+			Language:  &user.Language,
+			Country:   &user.Country,
 		}
 		updatedUser, err := testQueries.UpdateUser(context.Background(), arg)
 		require.NoError(t, err)
@@ -122,5 +116,4 @@ func TestListEmployee(t *testing.T) {
 	employees, err := testQueries.ListCompanyEmployees(context.Background(), arg)
 	require.NoError(t, err)
 	require.Subset(t, employees, users)
-
 }

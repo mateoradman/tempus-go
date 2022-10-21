@@ -5,8 +5,8 @@ import (
 	"log"
 
 	"github.com/jackc/pgx/v4"
-	"github.com/mateoradman/tempus/api"
-	"github.com/mateoradman/tempus/config"
+	"github.com/mateoradman/tempus/internal/api"
+	"github.com/mateoradman/tempus/internal/config"
 	db "github.com/mateoradman/tempus/internal/db/sqlc"
 )
 

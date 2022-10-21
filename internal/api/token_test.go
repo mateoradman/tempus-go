@@ -15,7 +15,7 @@ import (
 	"github.com/jackc/pgx/v4"
 	mockdb "github.com/mateoradman/tempus/internal/db/mock"
 	db "github.com/mateoradman/tempus/internal/db/sqlc"
-	"github.com/mateoradman/tempus/util"
+	"github.com/mateoradman/tempus/internal/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -198,7 +198,7 @@ func TestRefreshTokenAPI(t *testing.T) {
 			// set the refresh token to the newly created token
 			session.RefreshToken = token
 			session.ExpiresAt = payload.ExpiredAt
-			
+
 			tc.buildStubs(store)
 
 			jsonPayload := fmt.Sprintf(`{"refresh_token": "%s"}`, session.RefreshToken)
@@ -208,7 +208,6 @@ func TestRefreshTokenAPI(t *testing.T) {
 			request.Header.Set("Content-Type", "application/json; charset=UTF-8")
 
 			server.router.ServeHTTP(recorder, request)
-			fmt.Println(recorder.Body.String())
 			tc.checkResponse(t, recorder, server)
 		})
 	}

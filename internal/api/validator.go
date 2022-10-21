@@ -2,7 +2,7 @@ package api
 
 import (
 	"github.com/go-playground/validator/v10"
-	"github.com/mateoradman/tempus/util"
+	"github.com/mateoradman/tempus/internal/util"
 )
 
 // validGender is a custom gender validator

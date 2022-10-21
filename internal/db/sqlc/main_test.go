@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/jackc/pgx/v4"
-	"github.com/mateoradman/tempus/config"
+	"github.com/mateoradman/tempus/internal/config"
 )
 
 var testQueries *Queries

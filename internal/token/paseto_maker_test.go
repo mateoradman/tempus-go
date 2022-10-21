@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mateoradman/tempus/util"
+	"github.com/mateoradman/tempus/internal/util"
 	"github.com/stretchr/testify/require"
 )
 

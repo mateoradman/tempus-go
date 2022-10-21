@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
 	db "github.com/mateoradman/tempus/internal/db/sqlc"
-	"github.com/mateoradman/tempus/util"
+	"github.com/mateoradman/tempus/internal/util"
 )
 
 type UserRequest struct {

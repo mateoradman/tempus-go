@@ -15,7 +15,7 @@ import (
 	mockdb "github.com/mateoradman/tempus/internal/db/mock"
 	db "github.com/mateoradman/tempus/internal/db/sqlc"
 	"github.com/mateoradman/tempus/internal/token"
-	"github.com/mateoradman/tempus/util"
+	"github.com/mateoradman/tempus/internal/util"
 	"github.com/stretchr/testify/require"
 )
 

@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mateoradman/tempus/config"
+	"github.com/mateoradman/tempus/internal/config"
 	db "github.com/mateoradman/tempus/internal/db/sqlc"
-	"github.com/mateoradman/tempus/util"
+	"github.com/mateoradman/tempus/internal/util"
 	"github.com/stretchr/testify/require"
 )
 

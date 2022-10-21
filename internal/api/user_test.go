@@ -17,7 +17,7 @@ import (
 	mockdb "github.com/mateoradman/tempus/internal/db/mock"
 	db "github.com/mateoradman/tempus/internal/db/sqlc"
 	"github.com/mateoradman/tempus/internal/token"
-	"github.com/mateoradman/tempus/util"
+	"github.com/mateoradman/tempus/internal/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -552,7 +552,7 @@ func TestUpdateUserAPI(t *testing.T) {
 		{
 			name:   "OK",
 			userID: arg.ID,
-			arg: arg,
+			arg:    arg,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
 					GetUser(gomock.Any(), gomock.Eq(user.ID)).
@@ -574,7 +574,7 @@ func TestUpdateUserAPI(t *testing.T) {
 		{
 			name:   "NotFound",
 			userID: arg.ID,
-			arg: arg,
+			arg:    arg,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
 					GetUser(gomock.Any(), gomock.Eq(user.ID)).
@@ -594,7 +594,7 @@ func TestUpdateUserAPI(t *testing.T) {
 		{
 			name:   "InternalServerError",
 			userID: arg.ID,
-			arg: arg,
+			arg:    arg,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
 					GetUser(gomock.Any(), gomock.Eq(user.ID)).
@@ -614,7 +614,7 @@ func TestUpdateUserAPI(t *testing.T) {
 		{
 			name:   "InvalidUserID",
 			userID: 0,
-			arg: arg,
+			arg:    arg,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
 					GetUser(gomock.Any(), gomock.Any()).
@@ -633,7 +633,7 @@ func TestUpdateUserAPI(t *testing.T) {
 		{
 			name:   "Unauthorized",
 			userID: arg.ID,
-			arg: arg,
+			arg:    arg,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
 					GetUser(gomock.Any(), gomock.Any()).
@@ -672,7 +672,6 @@ func TestUpdateUserAPI(t *testing.T) {
 			tc.setupAuth(t, request, server.tokenMaker)
 
 			server.router.ServeHTTP(recorder, request)
-			fmt.Println(recorder.Body.String())
 			tc.checkResponse(t, recorder)
 		})
 	}

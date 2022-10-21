@@ -7,13 +7,13 @@ import (
 	"testing"
 
 	"github.com/jackc/pgx/v4"
-	"github.com/mateoradman/tempus/util"
+	"github.com/mateoradman/tempus/config"
 )
 
 var testQueries *Queries
 
 func TestMain(m *testing.M) {
-	config, err := util.LoadConfig("../../..")
+	config, err := config.LoadConfig("../../..")
 	if err != nil {
 		log.Fatal("cannot load config:", err)
 	}

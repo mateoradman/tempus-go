@@ -6,21 +6,21 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	"github.com/mateoradman/tempus/config"
 	db "github.com/mateoradman/tempus/internal/db/sqlc"
 	"github.com/mateoradman/tempus/internal/token"
-	"github.com/mateoradman/tempus/util"
 )
 
 // Server stores information about a server.
 type Server struct {
-	config     util.Config
+	config     config.Config
 	store      db.Store
 	tokenMaker token.Maker
 	router     *gin.Engine
 }
 
 // NewServer creates a new HTTP server and sets up routing.
-func NewServer(config util.Config, store db.Store) (*Server, error) {
+func NewServer(config config.Config, store db.Store) (*Server, error) {
 	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
 	if err != nil {
 		return nil, fmt.Errorf("cannot create token maker: %w", err)

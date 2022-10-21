@@ -6,12 +6,12 @@ import (
 
 	"github.com/jackc/pgx/v4"
 	"github.com/mateoradman/tempus/api"
+	"github.com/mateoradman/tempus/config"
 	db "github.com/mateoradman/tempus/internal/db/sqlc"
-	"github.com/mateoradman/tempus/util"
 )
 
 func main() {
-	config, err := util.LoadConfig(".")
+	config, err := config.LoadConfig(".")
 	if err != nil {
 		log.Fatal("cannot load config:", err)
 	}

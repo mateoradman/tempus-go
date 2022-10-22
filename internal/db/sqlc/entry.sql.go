@@ -179,7 +179,11 @@ func (q *Queries) ListUserEntries(ctx context.Context, arg ListUserEntriesParams
 
 const updateEntry = `-- name: UpdateEntry :one
 UPDATE entries
-SET user_id = $2, start_time = $3, end_time = $4
+SET 
+user_id = $2, 
+start_time = $3, 
+end_time = $4,
+date = $5
 WHERE id = $1
 RETURNING id, user_id, start_time, end_time, created_at, updated_at, date
 `
@@ -189,6 +193,7 @@ type UpdateEntryParams struct {
 	UserID    int64      `json:"user_id"`
 	StartTime time.Time  `json:"start_time"`
 	EndTime   *time.Time `json:"end_time"`
+	Date      time.Time  `json:"date"`
 }
 
 func (q *Queries) UpdateEntry(ctx context.Context, arg UpdateEntryParams) (Entry, error) {
@@ -197,6 +202,7 @@ func (q *Queries) UpdateEntry(ctx context.Context, arg UpdateEntryParams) (Entry
 		arg.UserID,
 		arg.StartTime,
 		arg.EndTime,
+		arg.Date,
 	)
 	var i Entry
 	err := row.Scan(

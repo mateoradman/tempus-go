@@ -55,11 +55,13 @@ func TestGetEntry(t *testing.T) {
 func TestUpdateEntry(t *testing.T) {
 	entry := createRandomEntry(t)
 	user := createRandomUser(t, nil, nil)
+	now := time.Now().UTC()
 	arg := UpdateEntryParams{
 		ID:        entry.ID,
 		UserID:    user.ID,
-		StartTime: time.Now().UTC(),
+		StartTime: now,
 		EndTime:   entry.EndTime,
+		Date:      now,
 	}
 
 	updatedEntry, err := testQueries.UpdateEntry(context.Background(), arg)

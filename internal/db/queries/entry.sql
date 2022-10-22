@@ -32,7 +32,11 @@ OFFSET $3;
 
 -- name: UpdateEntry :one
 UPDATE entries
-SET user_id = $2, start_time = $3, end_time = $4
+SET 
+user_id = $2, 
+start_time = $3, 
+end_time = $4,
+date = $5
 WHERE id = $1
 RETURNING *;
 

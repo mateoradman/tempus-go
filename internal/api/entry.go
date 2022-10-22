@@ -94,10 +94,10 @@ func (server *Server) updateEntry(ctx *gin.Context) {
 	}
 
 	arg := db.UpdateEntryParams{
-		ID:   reqID.ID,
-		UserID: req.UserID,
+		ID:        reqID.ID,
+		UserID:    req.UserID,
 		StartTime: req.StartTime,
-		EndTime: req.EndTime,
+		EndTime:   req.EndTime,
 	}
 	entry, err := server.store.UpdateEntry(ctx, arg)
 	if err != nil {

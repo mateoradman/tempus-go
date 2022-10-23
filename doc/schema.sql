@@ -1,6 +1,6 @@
 -- SQL dump generated using DBML (dbml-lang.org)
 -- Database: PostgreSQL
--- Generated at: 2022-10-15T12:33:09.007Z
+-- Generated at: 2022-10-23T13:13:06.200Z
 
 CREATE TABLE "teams" (
   "id" bigserial PRIMARY KEY,
@@ -12,18 +12,19 @@ CREATE TABLE "teams" (
 
 CREATE TABLE "users" (
   "id" bigserial PRIMARY KEY,
+  "role" int NOT NULL,
   "username" varchar(255) UNIQUE NOT NULL,
   "email" varchar(255) UNIQUE NOT NULL,
   "name" varchar(255) NOT NULL,
   "surname" varchar(255) NOT NULL,
   "company_id" bigint DEFAULT null,
   "password" varchar(255) NOT NULL,
-  "gender" varchar(255) NOT NULL,
+  "gender" varchar(255) DEFAULT 'unknown',
   "birth_date" date NOT NULL,
   "created_at" timestamp NOT NULL DEFAULT (now()),
   "updated_at" timestamp DEFAULT null,
-  "language" varchar(2) NOT NULL DEFAULT 'en',
-  "country" varchar(2) NOT NULL,
+  "language" varchar(2),
+  "country" varchar(2),
   "timezone" varchar(255),
   "manager_id" bigint DEFAULT null,
   "team_id" bigint DEFAULT null
@@ -31,39 +32,29 @@ CREATE TABLE "users" (
 
 CREATE TABLE "roles" (
   "id" bigserial PRIMARY KEY,
-  "name" varchar(255) UNIQUE NOT NULL,
-  "description" varchar NOT NULL,
-  "created_at" timestamp NOT NULL DEFAULT (now()),
-  "updated_at" timestamp DEFAULT null
-);
-
-CREATE TABLE "permissions" (
-  "id" bigserial PRIMARY KEY,
-  "name" varchar(255) UNIQUE NOT NULL,
-  "created_at" timestamp NOT NULL DEFAULT (now()),
-  "updated_at" timestamp DEFAULT null
+  "role" int UNIQUE NOT NULL,
+  "name" varchar(255) UNIQUE NOT NULL
 );
 
 CREATE TABLE "absences" (
   "id" bigserial PRIMARY KEY,
   "user_id" bigint NOT NULL,
+  "start_time" timestamp NOT NULL,
+  "end_time" timestamp DEFAULT null,
   "reason" varchar(255) NOT NULL,
   "paid" boolean NOT NULL DEFAULT true,
-  "date" date NOT NULL,
   "created_at" timestamp NOT NULL DEFAULT (now()),
   "updated_at" timestamp DEFAULT null,
-  "approved_by_id" bigint DEFAULT null,
-  "length" float NOT NULL
+  "approved_by_id" bigint DEFAULT null
 );
 
 CREATE TABLE "entries" (
   "id" bigserial PRIMARY KEY,
   "user_id" bigint NOT NULL,
-  "start" timestamp NOT NULL DEFAULT (now()),
-  "end" timestamp DEFAULT null,
+  "start_time" timestamp NOT NULL,
+  "end_time" timestamp DEFAULT null,
   "created_at" timestamp NOT NULL DEFAULT (now()),
-  "updated_at" timestamp DEFAULT null,
-  "date" date NOT NULL DEFAULT (now())
+  "updated_at" timestamp DEFAULT null
 );
 
 CREATE TABLE "companies" (
@@ -96,10 +87,6 @@ CREATE INDEX ON "users" ("manager_id");
 
 CREATE INDEX ON "users" ("team_id");
 
-CREATE INDEX ON "roles" ("name");
-
-CREATE INDEX ON "permissions" ("name");
-
 CREATE INDEX ON "absences" ("user_id");
 
 CREATE INDEX ON "entries" ("user_id");
@@ -108,9 +95,13 @@ COMMENT ON COLUMN "users"."language" IS 'ISO-2 language code';
 
 COMMENT ON COLUMN "users"."country" IS 'ISO-2 Country code';
 
-COMMENT ON COLUMN "absences"."length" IS 'length in hours and minutes as float';
+COMMENT ON COLUMN "users"."timezone" IS 'Timezone name';
+
+COMMENT ON COLUMN "roles"."role" IS '>0 && <=5';
 
 ALTER TABLE "teams" ADD FOREIGN KEY ("manager_id") REFERENCES "users" ("id");
+
+ALTER TABLE "users" ADD FOREIGN KEY ("role") REFERENCES "roles" ("role");
 
 ALTER TABLE "users" ADD FOREIGN KEY ("manager_id") REFERENCES "users" ("id");
 
@@ -123,27 +114,5 @@ ALTER TABLE "users" ADD FOREIGN KEY ("company_id") REFERENCES "companies" ("id")
 ALTER TABLE "entries" ADD CONSTRAINT "user_entries" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE;
 
 ALTER TABLE "absences" ADD CONSTRAINT "user_absences" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE;
-
-CREATE TABLE "users_roles" (
-  "users_id" bigserial,
-  "roles_id" bigserial,
-  PRIMARY KEY ("users_id", "roles_id")
-);
-
-ALTER TABLE "users_roles" ADD FOREIGN KEY ("users_id") REFERENCES "users" ("id");
-
-ALTER TABLE "users_roles" ADD FOREIGN KEY ("roles_id") REFERENCES "roles" ("id");
-
-
-CREATE TABLE "roles_permissions" (
-  "roles_id" bigserial,
-  "permissions_id" bigserial,
-  PRIMARY KEY ("roles_id", "permissions_id")
-);
-
-ALTER TABLE "roles_permissions" ADD FOREIGN KEY ("roles_id") REFERENCES "roles" ("id");
-
-ALTER TABLE "roles_permissions" ADD FOREIGN KEY ("permissions_id") REFERENCES "permissions" ("id");
-
 
 ALTER TABLE "sessions" ADD CONSTRAINT "user_sessions" FOREIGN KEY ("username") REFERENCES "users" ("username") ON DELETE CASCADE;

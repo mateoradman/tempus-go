@@ -12,11 +12,13 @@ func createRandomAbsence(t *testing.T) Absence {
 	user := createRandomUser(t, nil, nil)
 
 	today := time.Now().UTC()
+	end := today.Add(24 * time.Hour)
 	arg := CreateAbsenceParams{
-		UserID: user.ID,
-		Paid:   false,
-		Date:   today,
-		Length: 5.5,
+		UserID:    user.ID,
+		Paid:      false,
+		Reason:    "no reason",
+		StartTime: today,
+		EndTime:   &end,
 	}
 
 	absence, err := testQueries.CreateAbsence(context.Background(), arg)
@@ -25,10 +27,8 @@ func createRandomAbsence(t *testing.T) Absence {
 	require.NotZero(t, absence.ID)
 	require.Equal(t, arg.UserID, absence.UserID)
 	require.Equal(t, arg.Paid, absence.Paid)
-	require.Equal(t, arg.Length, absence.Length)
-	require.Equal(t, today.Day(), absence.Date.Day())
-	require.Equal(t, today.Month(), absence.Date.Month())
-	require.Equal(t, today.Year(), absence.Date.Year())
+	require.Equal(t, arg.StartTime, absence.StartTime)
+	require.Equal(t, arg.EndTime, absence.EndTime)
 	require.Nil(t, absence.ApprovedByID)
 	require.WithinDuration(t, time.Now(), absence.CreatedAt, 2*time.Second)
 	require.Nil(t, absence.UpdatedAt)
@@ -49,8 +49,8 @@ func TestGetAbsence(t *testing.T) {
 	require.Equal(t, absence.UserID, gotAbsence.UserID)
 	require.Equal(t, absence.ApprovedByID, gotAbsence.ApprovedByID)
 	require.Equal(t, absence.Paid, gotAbsence.Paid)
-	require.Equal(t, absence.Length, gotAbsence.Length)
-	require.Equal(t, absence.Date, gotAbsence.Date)
+	require.Equal(t, absence.StartTime, gotAbsence.StartTime)
+	require.Equal(t, absence.EndTime, gotAbsence.EndTime)
 	require.Equal(t, absence.CreatedAt, gotAbsence.CreatedAt)
 	require.Equal(t, absence.UpdatedAt, gotAbsence.UpdatedAt)
 }
@@ -59,12 +59,13 @@ func TestUpdateAbsence(t *testing.T) {
 	absence := createRandomAbsence(t)
 	user := createRandomUser(t, nil, nil)
 	today := time.Now().UTC()
+	end := today.Add(10 * time.Hour)
 	arg := UpdateAbsenceParams{
-		ID:     absence.ID,
-		UserID: user.ID,
-		Paid:   true,
-		Date:   today,
-		Length: 10,
+		ID:        absence.ID,
+		UserID:    user.ID,
+		Paid:      true,
+		StartTime: today,
+		EndTime:   &end,
 	}
 
 	updatedAbsence, err := testQueries.UpdateAbsence(context.Background(), arg)
@@ -73,10 +74,8 @@ func TestUpdateAbsence(t *testing.T) {
 	require.Equal(t, absence.ID, updatedAbsence.ID)
 	require.Equal(t, arg.UserID, updatedAbsence.UserID)
 	require.Equal(t, arg.Paid, updatedAbsence.Paid)
-	require.Equal(t, today.Day(), absence.Date.Day())
-	require.Equal(t, today.Month(), absence.Date.Month())
-	require.Equal(t, today.Year(), absence.Date.Year())
-	require.Equal(t, arg.Length, updatedAbsence.Length)
+	require.WithinDuration(t, arg.StartTime, updatedAbsence.StartTime, time.Second)
+	require.WithinDuration(t, *arg.EndTime, *updatedAbsence.EndTime, time.Second)
 	require.NotNil(t, updatedAbsence.UpdatedAt)
 	require.WithinDuration(t, time.Now(), *updatedAbsence.UpdatedAt, time.Second)
 	require.Equal(t, absence.CreatedAt, updatedAbsence.CreatedAt)
@@ -90,8 +89,8 @@ func TestDeleteAbsence(t *testing.T) {
 	require.Equal(t, absence.ID, deletedAbsence.ID)
 	require.Equal(t, absence.UserID, deletedAbsence.UserID)
 	require.Equal(t, absence.Paid, deletedAbsence.Paid)
-	require.Equal(t, absence.Date, deletedAbsence.Date)
-	require.Equal(t, absence.Length, deletedAbsence.Length)
+	require.Equal(t, absence.StartTime, deletedAbsence.StartTime)
+	require.Equal(t, absence.EndTime, deletedAbsence.EndTime)
 	require.Equal(t, absence.CreatedAt, deletedAbsence.CreatedAt)
 	require.Equal(t, absence.UpdatedAt, deletedAbsence.UpdatedAt)
 }
@@ -122,10 +121,9 @@ func TestListUserAbsences(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		today := time.Now().UTC()
 		arg := CreateAbsenceParams{
-			UserID: user.ID,
-			Paid:   false,
-			Date:   today,
-			Length: 5.5,
+			UserID:    user.ID,
+			Paid:      false,
+			StartTime: today,
 		}
 		absence, err := testQueries.CreateAbsence(context.Background(), arg)
 		require.NoError(t, err)

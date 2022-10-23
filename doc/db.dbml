@@ -18,19 +18,20 @@ Table teams {
 
 Table users {
   id bigserial [pk]
+  role int [ref: > roles.role, not null]
   username varchar(255) [unique, not null]
   email varchar(255) [unique, not null]
   name varchar(255) [not null]
   surname varchar(255) [not null]
   company_id bigint [default: null]
   password varchar(255) [not null]
-  gender varchar(255) [not null]
+  gender varchar(255) [default: 'unknown']
   birth_date date [not null]
   created_at timestamp [not null, default: `now()`]
   updated_at timestamp [default: null]
-  language varchar(2) [not null, default: 'en', note: 'ISO-2 language code']
-  country varchar(2) [not null, note: 'ISO-2 Country code']
-  timezone varchar(255)
+  language varchar(2) [note: 'ISO-2 language code']
+  country varchar(2) [note: 'ISO-2 Country code']
+  timezone varchar(255) [note: 'Timezone name']
   manager_id bigint [ref: - users.id, default: null]
   team_id bigint [ref: > teams.id, default: null]
   
@@ -44,51 +45,32 @@ Table users {
 
 Table roles {
   id bigserial [pk]
+  role int [not null, unique, note: '>0 && <=5']
   name varchar(255) [not null, unique]
-  description varchar [not null]
-  created_at timestamp [not null, default: `now()`]
-  updated_at timestamp [default: null]
-  
-  indexes {
-    name
-  }
-}
-
-Table permissions {
-  id bigserial [pk]
-  name varchar(255) [not null, unique]
-  created_at timestamp [not null, default: `now()`]
-  updated_at timestamp [default: null]
-  
-  indexes {
-    name
-  }
 }
 
 Table absences {
   id bigserial [pk] // auto-increment
   user_id bigint [not null] 
+  start_time timestamp [not null]
+  end_time timestamp [default: null]
   reason varchar(255) [not null]
   paid boolean [not null, default: true]
-  date date [not null]
   created_at timestamp [not null, default: `now()`]
   updated_at timestamp [default: null]
   approved_by_id bigint [ref: > users.id, default: null]
-  length float [not null, note: 'length in hours and minutes as float']
   indexes {
     user_id
   }
 }
 
-
 Table entries {
   id bigserial [pk]
   user_id bigint [not null] 
-  start timestamp [not null, default: `now()`]
-  end timestamp [default: null]
+  start_time timestamp [not null]
+  end_time timestamp [default: null]
   created_at timestamp [not null, default: `now()`]
   updated_at timestamp [default: null]
-  date date [not null, default: `now()`]
   indexes {
     user_id
   }
@@ -114,6 +96,4 @@ Table sessions {
 
 Ref user_entries: users.id < entries.user_id [delete: cascade]
 Ref user_absences: users.id < absences.user_id [delete: cascade]
-Ref users_roles: users.id <> roles.id
-Ref roles_permissions: roles.id <> permissions.id 
 Ref user_sessions: users.username < sessions.username [delete: cascade]

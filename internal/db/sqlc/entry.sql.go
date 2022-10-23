@@ -12,30 +12,23 @@ import (
 
 const createEntry = `-- name: CreateEntry :one
 INSERT INTO entries (
-user_id, start_time, end_time, date
+user_id, start_time, end_time
 ) VALUES (
 $1,
 $2,
-$3,
-$4
+$3
 )
-RETURNING id, user_id, start_time, end_time, created_at, updated_at, date
+RETURNING id, user_id, start_time, end_time, created_at, updated_at
 `
 
 type CreateEntryParams struct {
 	UserID    int64      `json:"user_id"`
 	StartTime time.Time  `json:"start_time"`
 	EndTime   *time.Time `json:"end_time"`
-	Date      time.Time  `json:"date"`
 }
 
 func (q *Queries) CreateEntry(ctx context.Context, arg CreateEntryParams) (Entry, error) {
-	row := q.db.QueryRow(ctx, createEntry,
-		arg.UserID,
-		arg.StartTime,
-		arg.EndTime,
-		arg.Date,
-	)
+	row := q.db.QueryRow(ctx, createEntry, arg.UserID, arg.StartTime, arg.EndTime)
 	var i Entry
 	err := row.Scan(
 		&i.ID,
@@ -44,7 +37,6 @@ func (q *Queries) CreateEntry(ctx context.Context, arg CreateEntryParams) (Entry
 		&i.EndTime,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.Date,
 	)
 	return i, err
 }
@@ -53,7 +45,7 @@ const deleteEntry = `-- name: DeleteEntry :one
 DELETE
 FROM entries
 WHERE id = $1
-RETURNING id, user_id, start_time, end_time, created_at, updated_at, date
+RETURNING id, user_id, start_time, end_time, created_at, updated_at
 `
 
 func (q *Queries) DeleteEntry(ctx context.Context, id int64) (Entry, error) {
@@ -66,13 +58,12 @@ func (q *Queries) DeleteEntry(ctx context.Context, id int64) (Entry, error) {
 		&i.EndTime,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.Date,
 	)
 	return i, err
 }
 
 const getEntry = `-- name: GetEntry :one
-SELECT id, user_id, start_time, end_time, created_at, updated_at, date 
+SELECT id, user_id, start_time, end_time, created_at, updated_at 
 FROM entries
 WHERE id = $1
 LIMIT 1
@@ -88,13 +79,12 @@ func (q *Queries) GetEntry(ctx context.Context, id int64) (Entry, error) {
 		&i.EndTime,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.Date,
 	)
 	return i, err
 }
 
 const listEntries = `-- name: ListEntries :many
-SELECT id, user_id, start_time, end_time, created_at, updated_at, date
+SELECT id, user_id, start_time, end_time, created_at, updated_at
 FROM entries
 ORDER BY id
 LIMIT $1
@@ -122,7 +112,6 @@ func (q *Queries) ListEntries(ctx context.Context, arg ListEntriesParams) ([]Ent
 			&i.EndTime,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-			&i.Date,
 		); err != nil {
 			return nil, err
 		}
@@ -135,7 +124,7 @@ func (q *Queries) ListEntries(ctx context.Context, arg ListEntriesParams) ([]Ent
 }
 
 const listUserEntries = `-- name: ListUserEntries :many
-SELECT id, user_id, start_time, end_time, created_at, updated_at, date
+SELECT id, user_id, start_time, end_time, created_at, updated_at
 FROM entries
 WHERE user_id = $1
 ORDER BY id
@@ -165,7 +154,6 @@ func (q *Queries) ListUserEntries(ctx context.Context, arg ListUserEntriesParams
 			&i.EndTime,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-			&i.Date,
 		); err != nil {
 			return nil, err
 		}
@@ -182,10 +170,9 @@ UPDATE entries
 SET 
 user_id = $2, 
 start_time = $3, 
-end_time = $4,
-date = $5
+end_time = $4
 WHERE id = $1
-RETURNING id, user_id, start_time, end_time, created_at, updated_at, date
+RETURNING id, user_id, start_time, end_time, created_at, updated_at
 `
 
 type UpdateEntryParams struct {
@@ -193,7 +180,6 @@ type UpdateEntryParams struct {
 	UserID    int64      `json:"user_id"`
 	StartTime time.Time  `json:"start_time"`
 	EndTime   *time.Time `json:"end_time"`
-	Date      time.Time  `json:"date"`
 }
 
 func (q *Queries) UpdateEntry(ctx context.Context, arg UpdateEntryParams) (Entry, error) {
@@ -202,7 +188,6 @@ func (q *Queries) UpdateEntry(ctx context.Context, arg UpdateEntryParams) (Entry
 		arg.UserID,
 		arg.StartTime,
 		arg.EndTime,
-		arg.Date,
 	)
 	var i Entry
 	err := row.Scan(
@@ -212,7 +197,6 @@ func (q *Queries) UpdateEntry(ctx context.Context, arg UpdateEntryParams) (Entry
 		&i.EndTime,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.Date,
 	)
 	return i, err
 }

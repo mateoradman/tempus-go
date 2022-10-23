@@ -28,7 +28,6 @@ func (server *Server) createEntry(ctx *gin.Context) {
 		UserID:    req.UserID,
 		StartTime: req.StartTime,
 		EndTime:   req.EndTime,
-		Date:      req.Date,
 	}
 	entry, err := server.store.CreateEntry(ctx, arg)
 	if err != nil {

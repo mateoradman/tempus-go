@@ -20,10 +20,8 @@ func createRandomUser(t *testing.T, company_id, team_id *int64) User {
 		Name:      util.RandomString(25),
 		Surname:   util.RandomString(25),
 		Password:  hashedPassword,
-		Gender:    util.RandomGender(),
+		Gender:    util.Pointer(util.RandomGender()),
 		BirthDate: birthDate,
-		Language:  "hr",
-		Country:   "HR",
 		CompanyID: company_id,
 		TeamID:    team_id,
 	}
@@ -38,8 +36,8 @@ func createRandomUser(t *testing.T, company_id, team_id *int64) User {
 	require.Equal(t, arg.Password, user.Password)
 	require.Equal(t, arg.Gender, user.Gender)
 	require.Equal(t, arg.BirthDate, user.BirthDate)
-	require.Equal(t, arg.Language, user.Language)
-	require.Equal(t, arg.Country, user.Country)
+	require.Nil(t, user.Language)
+	require.Nil(t, user.Country)
 	require.WithinDuration(t, time.Now().UTC(), user.CreatedAt, 2*time.Second)
 
 	// test if default values were correctly set
@@ -104,10 +102,10 @@ func TestUpdateUser(t *testing.T) {
 		ID:        user.ID,
 		Name:      &randomString,
 		Surname:   &randomString,
-		Gender:    &user.Gender,
+		Gender:    user.Gender,
 		BirthDate: &user.BirthDate,
-		Language:  &user.Language,
-		Country:   &user.Country,
+		Language:  util.Pointer("en"),
+		Country:   user.Country,
 	}
 
 	updatedUser, err := testQueries.UpdateUser(context.Background(), arg)
@@ -116,10 +114,10 @@ func TestUpdateUser(t *testing.T) {
 	require.Equal(t, arg.ID, updatedUser.ID)
 	require.Equal(t, *arg.Name, updatedUser.Name)
 	require.Equal(t, *arg.Surname, updatedUser.Surname)
-	require.Equal(t, *arg.Gender, updatedUser.Gender)
+	require.Equal(t, arg.Gender, updatedUser.Gender)
 	require.Equal(t, *arg.BirthDate, updatedUser.BirthDate)
-	require.Equal(t, *arg.Language, updatedUser.Language)
-	require.Equal(t, *arg.Country, updatedUser.Country)
+	require.Equal(t, arg.Language, updatedUser.Language)
+	require.Equal(t, arg.Country, updatedUser.Country)
 
 	// validate times remain unchanged
 	require.Equal(t, user.CreatedAt, updatedUser.CreatedAt)

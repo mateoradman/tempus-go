@@ -13,13 +13,13 @@ import (
 type Absence struct {
 	ID           int64      `json:"id"`
 	UserID       int64      `json:"user_id"`
+	StartTime    time.Time  `json:"start_time"`
+	EndTime      *time.Time `json:"end_time"`
 	Reason       string     `json:"reason"`
 	Paid         bool       `json:"paid"`
-	Date         time.Time  `json:"date"`
 	CreatedAt    time.Time  `json:"created_at"`
 	UpdatedAt    *time.Time `json:"updated_at"`
 	ApprovedByID *int64     `json:"approved_by_id"`
-	Length       float32    `json:"length"`
 }
 
 type Company struct {
@@ -36,27 +36,12 @@ type Entry struct {
 	EndTime   *time.Time `json:"end_time"`
 	CreatedAt time.Time  `json:"created_at"`
 	UpdatedAt *time.Time `json:"updated_at"`
-	Date      time.Time  `json:"date"`
-}
-
-type Permission struct {
-	ID        int64      `json:"id"`
-	Name      string     `json:"name"`
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt *time.Time `json:"updated_at"`
 }
 
 type Role struct {
-	ID          int64      `json:"id"`
-	Name        string     `json:"name"`
-	Description string     `json:"description"`
-	CreatedAt   time.Time  `json:"created_at"`
-	UpdatedAt   *time.Time `json:"updated_at"`
-}
-
-type RolesPermission struct {
-	RolesID       int64 `json:"roles_id"`
-	PermissionsID int64 `json:"permissions_id"`
+	ID   int64  `json:"id"`
+	Role int32  `json:"role"`
+	Name string `json:"name"`
 }
 
 type Session struct {
@@ -80,26 +65,23 @@ type Team struct {
 
 type User struct {
 	ID        int64      `json:"id"`
+	Role      int32      `json:"role"`
 	Username  string     `json:"username"`
 	Email     string     `json:"email"`
 	Name      string     `json:"name"`
 	Surname   string     `json:"surname"`
 	CompanyID *int64     `json:"company_id"`
 	Password  string     `json:"-"`
-	Gender    string     `json:"gender"`
+	Gender    *string    `json:"gender"`
 	BirthDate time.Time  `json:"birth_date"`
 	CreatedAt time.Time  `json:"created_at"`
 	UpdatedAt *time.Time `json:"updated_at"`
 	// ISO-2 language code
-	Language string `json:"language"`
+	Language *string `json:"language"`
 	// ISO-2 Country code
-	Country   string  `json:"country"`
+	Country *string `json:"country"`
+	// Timezone name
 	Timezone  *string `json:"timezone"`
 	ManagerID *int64  `json:"manager_id"`
 	TeamID    *int64  `json:"team_id"`
-}
-
-type UsersRole struct {
-	UsersID int64 `json:"users_id"`
-	RolesID int64 `json:"roles_id"`
 }

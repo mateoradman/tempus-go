@@ -74,12 +74,10 @@ func randomUser() db.User {
 		Name:      util.RandomString(5),
 		Username:  util.RandomString(5),
 		Surname:   util.RandomString(5),
-		Gender:    util.RandomGender(),
+		Gender:    util.Pointer(util.RandomGender()),
 		Email:     util.RandomEmail(),
 		CreatedAt: time.Now().UTC(),
 		BirthDate: time.Now().UTC(),
-		Language:  "en",
-		Country:   "GB",
 	}
 }
 
@@ -535,10 +533,10 @@ func TestUpdateUserAPI(t *testing.T) {
 		ID:        user.ID,
 		Name:      &user.Name,
 		Surname:   &user.Surname,
-		Gender:    &user.Gender,
+		Gender:    user.Gender,
 		BirthDate: &user.BirthDate,
-		Language:  &user.Language,
-		Country:   &user.Country,
+		Language:  user.Language,
+		Country:   user.Country,
 	}
 
 	testCases := []struct {

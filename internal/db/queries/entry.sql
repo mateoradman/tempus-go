@@ -1,11 +1,10 @@
 -- name: CreateEntry :one
 INSERT INTO entries (
-user_id, start_time, end_time, date
+user_id, start_time, end_time
 ) VALUES (
 $1,
 $2,
-$3,
-$4
+$3
 )
 RETURNING *;
 
@@ -35,8 +34,7 @@ UPDATE entries
 SET 
 user_id = $2, 
 start_time = $3, 
-end_time = $4,
-date = $5
+end_time = $4
 WHERE id = $1
 RETURNING *;
 

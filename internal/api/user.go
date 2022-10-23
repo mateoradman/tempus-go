@@ -12,18 +12,21 @@ import (
 )
 
 type UserRequest struct {
-	Username  string     `json:"username" binding:"required,alphanum"`
-	Name      string     `json:"name" binding:"required,min=1"`
-	Surname   string     `json:"surname" binding:"required,min=1"`
-	Email     string     `json:"email" binding:"required,email"`
-	CompanyID *int64     `json:"company_id"`
-	Gender    string     `json:"gender" binding:"required,gender"`
-	BirthDate *time.Time `json:"birth_date" binding:"lt"`
-	Language  string     `json:"language" binding:"required,len=2,ascii"`
-	Country   string     `json:"country" binding:"required,len=2,ascii"`
-	Timezone  *string    `json:"timezone"`
-	ManagerID *int64     `json:"manager_id"`
-	TeamID    *int64     `json:"team_id"`
+	// Required information
+	Username  string    `json:"username" binding:"required,alphanum"`
+	Name      string    `json:"name" binding:"required,min=1"`
+	Surname   string    `json:"surname" binding:"required,min=1"`
+	Email     string    `json:"email" binding:"required,email"`
+	BirthDate time.Time `json:"birth_date" binding:"required,lt"`
+	// Optional user information
+	Gender   *string `json:"gender,omitempty" binding:"omitempty,gender"`
+	Language *string `json:"language,omitempty" binding:"omitempty,len=2,ascii"`
+	Country  *string `json:"country,omitempty" binding:"omitempty,len=2,ascii"`
+	Timezone *string `json:"timezone,omitempty" binding:"omitempty,alphanum"`
+	// Foreign keys
+	CompanyID *int64 `json:"company_id"`
+	ManagerID *int64 `json:"manager_id"`
+	TeamID    *int64 `json:"team_id"`
 }
 
 type createUserRequest struct {
@@ -52,7 +55,7 @@ func (server *Server) createUser(ctx *gin.Context) {
 		Surname:   req.Surname,
 		CompanyID: req.CompanyID,
 		Gender:    req.Gender,
-		BirthDate: *req.BirthDate,
+		BirthDate: req.BirthDate,
 		Language:  req.Language,
 		Country:   req.Country,
 		Timezone:  req.Timezone,

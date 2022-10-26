@@ -7,17 +7,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mateoradman/tempus/internal/token"
+	"github.com/mateoradman/tempus/internal/util"
 )
 
-const (
-	authorizationHeaderKey  = "authorization"
-	authorizationTypeBearer = "bearer"
-	authorizationPayloadKey = "authorization_payload"
-)
-
+// authMiddleware gets the bearer token from the request and sets the `util.AuthPayloadKey` in the context.
 func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		authorizationHeader := ctx.GetHeader(authorizationHeaderKey)
+		authorizationHeader := ctx.GetHeader(util.AuthHeaderKey)
 		if len(authorizationHeader) == 0 {
 			err := errors.New("authorization header is not provided")
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(err))
@@ -32,7 +28,7 @@ func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 		}
 
 		authorizationType := strings.ToLower(fields[0])
-		if authorizationType != authorizationTypeBearer {
+		if authorizationType != util.AuthTypeBearer {
 			err := errors.New("this authorization is not supported by the server")
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(err))
 			return
@@ -45,7 +41,7 @@ func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 			return
 		}
 
-		ctx.Set(authorizationPayloadKey, payload)
+		ctx.Set(util.AuthPayloadKey, payload)
 		ctx.Next()
 	}
 

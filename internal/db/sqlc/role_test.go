@@ -4,16 +4,19 @@ import (
 	"context"
 	"testing"
 
-	"github.com/mateoradman/tempus/internal/rbac"
+	"github.com/mateoradman/tempus/internal/util"
 	"github.com/stretchr/testify/require"
 )
 
 func TestGetRole(t *testing.T) {
-	gotRole, err := testQueries.GetRole(context.Background(), int32(rbac.DefaultRole))
-	require.NoError(t, err)
-	require.NotEmpty(t, gotRole)
-	require.NotEmpty(t, gotRole.ID)
-	require.Equal(t, gotRole.Role, int32(rbac.DefaultRole))
+	roles := []util.AccessRole{util.SuperUserRole, util.AdminRole, util.CompanyAdminRole, util.TeamManagerRole, util.DefaultRole}
+	for _, v := range roles {
+		gotRole, err := testQueries.GetRole(context.Background(), int32(v))
+		require.NoError(t, err)
+		require.NotEmpty(t, gotRole)
+		require.NotEmpty(t, gotRole.ID)
+		require.Equal(t, gotRole.Role, int32(v))
+	}
 }
 
 func TestListRoles(t *testing.T) {

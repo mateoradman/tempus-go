@@ -1,4 +1,4 @@
-package rbac
+package util
 
 // AccessRole represents user role type
 type AccessRole int32

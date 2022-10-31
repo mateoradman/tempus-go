@@ -99,10 +99,10 @@ func TestListEmployee(t *testing.T) {
 			ID:        user.ID,
 			Name:      &user.Name,
 			Surname:   &user.Surname,
-			Gender:    &user.Gender,
+			Gender:    user.Gender,
 			BirthDate: &user.BirthDate,
-			Language:  &user.Language,
-			Country:   &user.Country,
+			Language:  user.Language,
+			Country:   user.Country,
 		}
 		updatedUser, err := testQueries.UpdateUser(context.Background(), arg)
 		require.NoError(t, err)

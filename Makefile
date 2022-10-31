@@ -19,7 +19,7 @@ sqlc:
 	sqlc generate
 
 server:
-	go run main.go
+	go run cmd/tempus/tempus.go
 
 test:
 	go test -v -cover ./...

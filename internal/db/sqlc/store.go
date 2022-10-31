@@ -4,10 +4,12 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v4"
+	"github.com/mateoradman/tempus/internal/config"
 )
 
 type Store interface {
 	Querier
+	SeedDatabase(ctx context.Context, config config.Config) error
 }
 type SQLStore struct {
 	db *pgx.Conn
@@ -36,4 +38,12 @@ func (store *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) erro
 		return err
 	}
 	return tx.Commit(ctx)
+}
+
+func (store SQLStore) SeedDatabase(ctx context.Context, config config.Config) error {
+	return store.execTx(ctx,
+		func(q *Queries) error {
+			return seedSuperUser(ctx, q, config)
+		},
+	)
 }

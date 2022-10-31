@@ -12,7 +12,7 @@ import (
 
 const createAbsence = `-- name: CreateAbsence :one
 INSERT INTO absences (
-user_id, reason, paid, date, approved_by_id, length
+user_id, start_time, end_time, reason, paid, approved_by_id
 ) VALUES (
 $1,
 $2,
@@ -21,38 +21,38 @@ $4,
 $5,
 $6
 )
-RETURNING id, user_id, reason, paid, date, created_at, updated_at, approved_by_id, length
+RETURNING id, user_id, start_time, end_time, reason, paid, created_at, updated_at, approved_by_id
 `
 
 type CreateAbsenceParams struct {
-	UserID       int64     `json:"user_id"`
-	Reason       string    `json:"reason"`
-	Paid         bool      `json:"paid"`
-	Date         time.Time `json:"date"`
-	ApprovedByID *int64    `json:"approved_by_id"`
-	Length       float32   `json:"length"`
+	UserID       int64      `json:"user_id"`
+	StartTime    time.Time  `json:"start_time"`
+	EndTime      *time.Time `json:"end_time"`
+	Reason       string     `json:"reason"`
+	Paid         bool       `json:"paid"`
+	ApprovedByID *int64     `json:"approved_by_id"`
 }
 
 func (q *Queries) CreateAbsence(ctx context.Context, arg CreateAbsenceParams) (Absence, error) {
 	row := q.db.QueryRow(ctx, createAbsence,
 		arg.UserID,
+		arg.StartTime,
+		arg.EndTime,
 		arg.Reason,
 		arg.Paid,
-		arg.Date,
 		arg.ApprovedByID,
-		arg.Length,
 	)
 	var i Absence
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
+		&i.StartTime,
+		&i.EndTime,
 		&i.Reason,
 		&i.Paid,
-		&i.Date,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.ApprovedByID,
-		&i.Length,
 	)
 	return i, err
 }
@@ -61,7 +61,7 @@ const deleteAbsence = `-- name: DeleteAbsence :one
 DELETE
 FROM absences
 WHERE id = $1
-RETURNING id, user_id, reason, paid, date, created_at, updated_at, approved_by_id, length
+RETURNING id, user_id, start_time, end_time, reason, paid, created_at, updated_at, approved_by_id
 `
 
 func (q *Queries) DeleteAbsence(ctx context.Context, id int64) (Absence, error) {
@@ -70,19 +70,19 @@ func (q *Queries) DeleteAbsence(ctx context.Context, id int64) (Absence, error) 
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
+		&i.StartTime,
+		&i.EndTime,
 		&i.Reason,
 		&i.Paid,
-		&i.Date,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.ApprovedByID,
-		&i.Length,
 	)
 	return i, err
 }
 
 const getAbsence = `-- name: GetAbsence :one
-SELECT id, user_id, reason, paid, date, created_at, updated_at, approved_by_id, length 
+SELECT id, user_id, start_time, end_time, reason, paid, created_at, updated_at, approved_by_id 
 FROM absences
 WHERE id = $1
 LIMIT 1
@@ -94,19 +94,19 @@ func (q *Queries) GetAbsence(ctx context.Context, id int64) (Absence, error) {
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
+		&i.StartTime,
+		&i.EndTime,
 		&i.Reason,
 		&i.Paid,
-		&i.Date,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.ApprovedByID,
-		&i.Length,
 	)
 	return i, err
 }
 
 const listAbsences = `-- name: ListAbsences :many
-SELECT id, user_id, reason, paid, date, created_at, updated_at, approved_by_id, length
+SELECT id, user_id, start_time, end_time, reason, paid, created_at, updated_at, approved_by_id
 FROM absences
 ORDER BY id
 LIMIT $1
@@ -130,13 +130,13 @@ func (q *Queries) ListAbsences(ctx context.Context, arg ListAbsencesParams) ([]A
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
+			&i.StartTime,
+			&i.EndTime,
 			&i.Reason,
 			&i.Paid,
-			&i.Date,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.ApprovedByID,
-			&i.Length,
 		); err != nil {
 			return nil, err
 		}
@@ -149,7 +149,7 @@ func (q *Queries) ListAbsences(ctx context.Context, arg ListAbsencesParams) ([]A
 }
 
 const listUserAbsences = `-- name: ListUserAbsences :many
-SELECT id, user_id, reason, paid, date, created_at, updated_at, approved_by_id, length
+SELECT id, user_id, start_time, end_time, reason, paid, created_at, updated_at, approved_by_id
 FROM absences
 WHERE user_id = $1
 ORDER BY id
@@ -175,13 +175,13 @@ func (q *Queries) ListUserAbsences(ctx context.Context, arg ListUserAbsencesPara
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
+			&i.StartTime,
+			&i.EndTime,
 			&i.Reason,
 			&i.Paid,
-			&i.Date,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.ApprovedByID,
-			&i.Length,
 		); err != nil {
 			return nil, err
 		}
@@ -195,19 +195,25 @@ func (q *Queries) ListUserAbsences(ctx context.Context, arg ListUserAbsencesPara
 
 const updateAbsence = `-- name: UpdateAbsence :one
 UPDATE absences
-SET user_id = $2, reason = $3, paid = $4, date = $5, approved_by_id = $6, length = $7
+SET 
+user_id = $2, 
+reason = $3, 
+paid = $4, 
+start_time = $5, 
+end_time = $6, 
+approved_by_id = $7
 WHERE id = $1
-RETURNING id, user_id, reason, paid, date, created_at, updated_at, approved_by_id, length
+RETURNING id, user_id, start_time, end_time, reason, paid, created_at, updated_at, approved_by_id
 `
 
 type UpdateAbsenceParams struct {
-	ID           int64     `json:"id"`
-	UserID       int64     `json:"user_id"`
-	Reason       string    `json:"reason"`
-	Paid         bool      `json:"paid"`
-	Date         time.Time `json:"date"`
-	ApprovedByID *int64    `json:"approved_by_id"`
-	Length       float32   `json:"length"`
+	ID           int64      `json:"id"`
+	UserID       int64      `json:"user_id"`
+	Reason       string     `json:"reason"`
+	Paid         bool       `json:"paid"`
+	StartTime    time.Time  `json:"start_time"`
+	EndTime      *time.Time `json:"end_time"`
+	ApprovedByID *int64     `json:"approved_by_id"`
 }
 
 func (q *Queries) UpdateAbsence(ctx context.Context, arg UpdateAbsenceParams) (Absence, error) {
@@ -216,21 +222,21 @@ func (q *Queries) UpdateAbsence(ctx context.Context, arg UpdateAbsenceParams) (A
 		arg.UserID,
 		arg.Reason,
 		arg.Paid,
-		arg.Date,
+		arg.StartTime,
+		arg.EndTime,
 		arg.ApprovedByID,
-		arg.Length,
 	)
 	var i Absence
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
+		&i.StartTime,
+		&i.EndTime,
 		&i.Reason,
 		&i.Paid,
-		&i.Date,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.ApprovedByID,
-		&i.Length,
 	)
 	return i, err
 }

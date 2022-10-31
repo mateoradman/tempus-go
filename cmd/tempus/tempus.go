@@ -22,6 +22,12 @@ func main() {
 	}
 
 	store := db.NewStore(conn)
+	// Seed the database with pre-defined values
+	err = store.SeedDatabase(context.Background(), config)
+	if err != nil {
+		log.Fatalf("cannot seed database %v", err)
+	}
+
 	server, err := api.NewServer(config, store)
 	if err != nil {
 		log.Fatal("cannot create server:", err)

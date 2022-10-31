@@ -1,6 +1,6 @@
 -- name: CreateAbsence :one
 INSERT INTO absences (
-user_id, reason, paid, date, approved_by_id, length
+user_id, start_time, end_time, reason, paid, approved_by_id
 ) VALUES (
 $1,
 $2,
@@ -34,7 +34,13 @@ OFFSET $3;
 
 -- name: UpdateAbsence :one
 UPDATE absences
-SET user_id = $2, reason = $3, paid = $4, date = $5, approved_by_id = $6, length = $7
+SET 
+user_id = $2, 
+reason = $3, 
+paid = $4, 
+start_time = $5, 
+end_time = $6, 
+approved_by_id = $7
 WHERE id = $1
 RETURNING *;
 

@@ -3,85 +3,23 @@ package db
 import (
 	"context"
 	"testing"
-	"time"
 
 	"github.com/mateoradman/tempus/internal/util"
 	"github.com/stretchr/testify/require"
 )
 
-func createRandomRole(t *testing.T) Role {
-	arg := CreateRoleParams{
-		Name:        util.RandomString(150),
-		Description: util.RandomString(150),
-	}
-
-	role, err := testQueries.CreateRole(context.Background(), arg)
-	require.NoError(t, err)
-	require.NotEmpty(t, role)
-	require.Equal(t, arg.Name, role.Name)
-	require.Equal(t, arg.Description, role.Description)
-	require.NotZero(t, role.ID)
-	require.NotNil(t, role.CreatedAt)
-	require.Nil(t, role.UpdatedAt)
-
-	return role
-}
-
-func TestCreateRole(t *testing.T) {
-	createRandomRole(t)
-}
-
 func TestGetRole(t *testing.T) {
-	role := createRandomRole(t)
-	gotRole, err := testQueries.GetRole(context.Background(), role.ID)
-	require.NoError(t, err)
-	require.NotEmpty(t, gotRole)
-	require.Equal(t, role.ID, gotRole.ID)
-	require.Equal(t, role.Name, gotRole.Name)
-	require.Equal(t, role.Description, gotRole.Description)
-	require.Equal(t, role.CreatedAt, gotRole.CreatedAt)
-	require.Equal(t, role.UpdatedAt, gotRole.UpdatedAt)
-	require.Equal(t, role.Name, gotRole.Name)
-}
-
-func TestUpdateRole(t *testing.T) {
-	role := createRandomRole(t)
-	expectedLen := 25
-	name := util.RandomString(expectedLen)
-	arg := UpdateRoleParams{
-		ID:          role.ID,
-		Name:        name,
-		Description: name,
+	roles := []util.AccessRole{util.SuperUserRole, util.AdminRole, util.CompanyAdminRole, util.TeamManagerRole, util.DefaultRole}
+	for _, v := range roles {
+		gotRole, err := testQueries.GetRole(context.Background(), int32(v))
+		require.NoError(t, err)
+		require.NotEmpty(t, gotRole)
+		require.NotEmpty(t, gotRole.ID)
+		require.Equal(t, gotRole.Role, int32(v))
 	}
-
-	updatedRole, err := testQueries.UpdateRole(context.Background(), arg)
-	require.NoError(t, err)
-	require.NotEmpty(t, updatedRole)
-	require.Equal(t, role.ID, updatedRole.ID)
-	require.Equal(t, name, updatedRole.Name)
-	require.Equal(t, updatedRole.Name, updatedRole.Description)
-	require.NotNil(t, updatedRole.UpdatedAt)
-	require.WithinDuration(t, time.Now(), *updatedRole.UpdatedAt, time.Second)
-	require.Equal(t, role.CreatedAt, updatedRole.CreatedAt)
-}
-
-func TestDeleteRole(t *testing.T) {
-	role := createRandomRole(t)
-	deletedRole, err := testQueries.DeleteRole(context.Background(), role.ID)
-	require.NoError(t, err)
-	require.NotEmpty(t, deletedRole)
-	require.Equal(t, role.ID, deletedRole.ID)
-	require.Equal(t, role.Name, deletedRole.Name)
-	require.Equal(t, role.Description, deletedRole.Description)
-	require.Nil(t, deletedRole.UpdatedAt)
-	require.Equal(t, role.CreatedAt, deletedRole.CreatedAt)
 }
 
 func TestListRoles(t *testing.T) {
-	for i := 0; i < 10; i++ {
-		// Create 10 roles
-		createRandomRole(t)
-	}
 
 	arg := ListRolesParams{
 		Limit:  5,
@@ -92,7 +30,9 @@ func TestListRoles(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, roles, int(arg.Limit))
 
-	for _, role := range roles {
+	for i, role := range roles {
 		require.NotEmpty(t, role)
+		roleValue := int32(i + 1)
+		require.Equal(t, role.Role, roleValue)
 	}
 }

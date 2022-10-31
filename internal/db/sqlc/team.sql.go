@@ -78,7 +78,7 @@ func (q *Queries) GetTeam(ctx context.Context, id int64) (Team, error) {
 }
 
 const listTeamMembers = `-- name: ListTeamMembers :many
-SELECT id, username, email, name, surname, company_id, password, gender, birth_date, created_at, updated_at, language, country, timezone, manager_id, team_id
+SELECT id, role, username, email, name, surname, company_id, password, gender, birth_date, created_at, updated_at, language, country, timezone, manager_id, team_id
 FROM users
 WHERE team_id = $1
 ORDER BY id
@@ -103,6 +103,7 @@ func (q *Queries) ListTeamMembers(ctx context.Context, arg ListTeamMembersParams
 		var i User
 		if err := rows.Scan(
 			&i.ID,
+			&i.Role,
 			&i.Username,
 			&i.Email,
 			&i.Name,

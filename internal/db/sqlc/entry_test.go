@@ -15,7 +15,6 @@ func createRandomEntry(t *testing.T) Entry {
 	arg := CreateEntryParams{
 		UserID:    user.ID,
 		StartTime: today,
-		Date:      today,
 	}
 
 	entry, err := testQueries.CreateEntry(context.Background(), arg)
@@ -24,9 +23,6 @@ func createRandomEntry(t *testing.T) Entry {
 	require.NotZero(t, entry.ID)
 	require.Equal(t, arg.UserID, entry.UserID)
 	require.WithinDuration(t, entry.StartTime, arg.StartTime, 500*time.Millisecond)
-	require.Equal(t, today.Day(), entry.Date.Day())
-	require.Equal(t, today.Month(), entry.Date.Month())
-	require.Equal(t, today.Year(), entry.Date.Year())
 	require.Nil(t, entry.EndTime)
 	require.WithinDuration(t, time.Now(), entry.CreatedAt, time.Second)
 	require.Nil(t, entry.UpdatedAt)
@@ -47,7 +43,6 @@ func TestGetEntry(t *testing.T) {
 	require.Equal(t, entry.UserID, gotEntry.UserID)
 	require.Equal(t, entry.StartTime, gotEntry.StartTime)
 	require.Equal(t, entry.EndTime, gotEntry.EndTime)
-	require.Equal(t, entry.Date, gotEntry.Date)
 	require.Equal(t, entry.CreatedAt, gotEntry.CreatedAt)
 	require.Equal(t, entry.UpdatedAt, gotEntry.UpdatedAt)
 }
@@ -61,7 +56,6 @@ func TestUpdateEntry(t *testing.T) {
 		UserID:    user.ID,
 		StartTime: now,
 		EndTime:   entry.EndTime,
-		Date:      now,
 	}
 
 	updatedEntry, err := testQueries.UpdateEntry(context.Background(), arg)
@@ -85,7 +79,6 @@ func TestDeleteEntry(t *testing.T) {
 	require.Equal(t, entry.UserID, deletedEntry.UserID)
 	require.Equal(t, entry.StartTime, deletedEntry.StartTime)
 	require.Equal(t, entry.EndTime, deletedEntry.EndTime)
-	require.Equal(t, entry.Date, deletedEntry.Date)
 	require.Equal(t, entry.CreatedAt, deletedEntry.CreatedAt)
 	require.Equal(t, entry.UpdatedAt, deletedEntry.UpdatedAt)
 }
@@ -118,7 +111,6 @@ func TestListUserEntries(t *testing.T) {
 		arg := CreateEntryParams{
 			UserID:    user.ID,
 			StartTime: today,
-			Date:      today,
 		}
 		entry, err := testQueries.CreateEntry(context.Background(), arg)
 		require.NoError(t, err)

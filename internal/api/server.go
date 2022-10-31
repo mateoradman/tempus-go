@@ -8,15 +8,17 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/mateoradman/tempus/internal/config"
 	db "github.com/mateoradman/tempus/internal/db/sqlc"
+	"github.com/mateoradman/tempus/internal/rbac"
 	"github.com/mateoradman/tempus/internal/token"
 )
 
 // Server stores information about a server.
 type Server struct {
-	config     config.Config
-	store      db.Store
-	tokenMaker token.Maker
-	router     *gin.Engine
+	config      config.Config
+	store       db.Store
+	tokenMaker  token.Maker
+	rbacService *rbac.RBACService
+	router      *gin.Engine
 }
 
 // NewServer creates a new HTTP server and sets up routing.
@@ -25,10 +27,15 @@ func NewServer(config config.Config, store db.Store) (*Server, error) {
 	if err != nil {
 		return nil, fmt.Errorf("cannot create token maker: %w", err)
 	}
+
+	// role based access control service
+	rbacService := rbac.NewRBACService(store)
+
 	server := &Server{
-		config:     config,
-		store:      store,
-		tokenMaker: tokenMaker,
+		config:      config,
+		store:       store,
+		tokenMaker:  tokenMaker,
+		rbacService: rbacService,
 	}
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {

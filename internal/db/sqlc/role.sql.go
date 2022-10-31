@@ -9,75 +9,22 @@ import (
 	"context"
 )
 
-const createRole = `-- name: CreateRole :one
-INSERT INTO roles (
-name,
-description
-) VALUES (
-    $1, $2
-) 
-RETURNING id, name, description, created_at, updated_at
-`
-
-type CreateRoleParams struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-}
-
-func (q *Queries) CreateRole(ctx context.Context, arg CreateRoleParams) (Role, error) {
-	row := q.db.QueryRow(ctx, createRole, arg.Name, arg.Description)
-	var i Role
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Description,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
-const deleteRole = `-- name: DeleteRole :one
-DELETE
-FROM roles
-WHERE id = $1 RETURNING id, name, description, created_at, updated_at
-`
-
-func (q *Queries) DeleteRole(ctx context.Context, id int64) (Role, error) {
-	row := q.db.QueryRow(ctx, deleteRole, id)
-	var i Role
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Description,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
 const getRole = `-- name: GetRole :one
-SELECT id, name, description, created_at, updated_at
+SELECT id, role, name
 FROM roles
-WHERE id = $1
+WHERE role = $1
 LIMIT 1
 `
 
-func (q *Queries) GetRole(ctx context.Context, id int64) (Role, error) {
-	row := q.db.QueryRow(ctx, getRole, id)
+func (q *Queries) GetRole(ctx context.Context, role int32) (Role, error) {
+	row := q.db.QueryRow(ctx, getRole, role)
 	var i Role
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Description,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
+	err := row.Scan(&i.ID, &i.Role, &i.Name)
 	return i, err
 }
 
 const listRoles = `-- name: ListRoles :many
-SELECT id, name, description, created_at, updated_at
+SELECT id, role, name
 FROM roles
 ORDER BY id
 LIMIT $1
@@ -98,13 +45,7 @@ func (q *Queries) ListRoles(ctx context.Context, arg ListRolesParams) ([]Role, e
 	items := []Role{}
 	for rows.Next() {
 		var i Role
-		if err := rows.Scan(
-			&i.ID,
-			&i.Name,
-			&i.Description,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-		); err != nil {
+		if err := rows.Scan(&i.ID, &i.Role, &i.Name); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -113,30 +54,4 @@ func (q *Queries) ListRoles(ctx context.Context, arg ListRolesParams) ([]Role, e
 		return nil, err
 	}
 	return items, nil
-}
-
-const updateRole = `-- name: UpdateRole :one
-UPDATE roles 
-SET name = $2, description = $3 
-WHERE id = $1 
-RETURNING id, name, description, created_at, updated_at
-`
-
-type UpdateRoleParams struct {
-	ID          int64  `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-}
-
-func (q *Queries) UpdateRole(ctx context.Context, arg UpdateRoleParams) (Role, error) {
-	row := q.db.QueryRow(ctx, updateRole, arg.ID, arg.Name, arg.Description)
-	var i Role
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Description,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
 }

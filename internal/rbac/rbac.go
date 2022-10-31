@@ -37,16 +37,6 @@ func (s *RBACService) isCompanyAdmin(user db.User, companyID *int64) bool {
 	return (user.Role <= int32(util.CompanyAdminRole)) && (user.CompanyID == companyID)
 }
 
-// IsLowerRole checks whether the requesting user has higher role than the user it wants to change
-// Used for account creation/deletion
-func (s *RBACService) IsLowerRole(ctx *gin.Context, r util.AccessRole) bool {
-	user, err := s.getUser(ctx)
-	if err != nil {
-		return false
-	}
-	return user.Role < int32(r)
-}
-
 // EnforceRole checks that the user role is equal or stronger than the required AccessRole.
 func (s *RBACService) EnforceRole(ctx *gin.Context, r util.AccessRole) bool {
 	user, err := s.getUser(ctx)

@@ -41,7 +41,6 @@ func getContext(t *testing.T, user db.User) *gin.Context {
 }
 
 func setupRBAC(t *testing.T) (*mockdb.MockStore, *RBACService) {
-
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	store := mockdb.NewMockStore(ctrl)
@@ -273,7 +272,7 @@ func TestEnforceCompany(t *testing.T) {
 	}{
 		{
 			name: "OK",
-			buildStubs: func(store *mockdb.MockStore) (db.User, *int64){
+			buildStubs: func(store *mockdb.MockStore) (db.User, *int64) {
 				user := setupUser(util.AdminRole)
 				user.CompanyID = util.Pointer(int64(20))
 				store.EXPECT().
@@ -288,7 +287,7 @@ func TestEnforceCompany(t *testing.T) {
 		},
 		{
 			name: "ErrorFindingUser",
-			buildStubs: func(store *mockdb.MockStore) (db.User, *int64){
+			buildStubs: func(store *mockdb.MockStore) (db.User, *int64) {
 				user := db.User{}
 				store.EXPECT().
 					GetUserByUsername(gomock.Any(), gomock.Eq(user.Username)).

@@ -25,20 +25,20 @@ VALUES ($1,
         $10,
         $11,
         $12,
-        $13) RETURNING id, role, username, email, name, surname, company_id, password, gender, birth_date, created_at, updated_at, language, country, timezone, manager_id, team_id
+        $13) RETURNING id, username, email, name, surname, company_id, password, gender, birth_date, created_at, updated_at, language, country, timezone, manager_id, team_id
 `
 
 type CreateUserParams struct {
 	Username  string    `json:"username"`
-	Password  string    `json:"-"`
+	Password  string    `json:"password"`
 	Email     string    `json:"email"`
 	Name      string    `json:"name"`
 	Surname   string    `json:"surname"`
 	BirthDate time.Time `json:"birth_date"`
-	Gender    *string   `json:"gender"`
-	Language  *string   `json:"language"`
+	Gender    string    `json:"gender"`
+	Language  string    `json:"language"`
 	Country   *string   `json:"country"`
-	Timezone  *string   `json:"timezone"`
+	Timezone  string    `json:"timezone"`
 	CompanyID *int64    `json:"company_id"`
 	ManagerID *int64    `json:"manager_id"`
 	TeamID    *int64    `json:"team_id"`
@@ -63,7 +63,6 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	var i User
 	err := row.Scan(
 		&i.ID,
-		&i.Role,
 		&i.Username,
 		&i.Email,
 		&i.Name,
@@ -87,7 +86,7 @@ const deleteUser = `-- name: DeleteUser :one
 
 DELETE
 FROM users
-WHERE id = $1 RETURNING id, role, username, email, name, surname, company_id, password, gender, birth_date, created_at, updated_at, language, country, timezone, manager_id, team_id
+WHERE id = $1 RETURNING id, username, email, name, surname, company_id, password, gender, birth_date, created_at, updated_at, language, country, timezone, manager_id, team_id
 `
 
 func (q *Queries) DeleteUser(ctx context.Context, id int64) (User, error) {
@@ -95,7 +94,6 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) (User, error) {
 	var i User
 	err := row.Scan(
 		&i.ID,
-		&i.Role,
 		&i.Username,
 		&i.Email,
 		&i.Name,
@@ -117,7 +115,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) (User, error) {
 
 const getUser = `-- name: GetUser :one
 
-SELECT id, role, username, email, name, surname, company_id, password, gender, birth_date, created_at, updated_at, language, country, timezone, manager_id, team_id
+SELECT id, username, email, name, surname, company_id, password, gender, birth_date, created_at, updated_at, language, country, timezone, manager_id, team_id
 FROM users
 WHERE id = $1
 LIMIT 1
@@ -128,7 +126,6 @@ func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
 	var i User
 	err := row.Scan(
 		&i.ID,
-		&i.Role,
 		&i.Username,
 		&i.Email,
 		&i.Name,
@@ -150,7 +147,7 @@ func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
 
 const getUserByEmail = `-- name: GetUserByEmail :one
 
-SELECT id, role, username, email, name, surname, company_id, password, gender, birth_date, created_at, updated_at, language, country, timezone, manager_id, team_id
+SELECT id, username, email, name, surname, company_id, password, gender, birth_date, created_at, updated_at, language, country, timezone, manager_id, team_id
 FROM users
 WHERE email = $1
 LIMIT 1
@@ -161,7 +158,6 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 	var i User
 	err := row.Scan(
 		&i.ID,
-		&i.Role,
 		&i.Username,
 		&i.Email,
 		&i.Name,
@@ -183,7 +179,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 
 const getUserByUsername = `-- name: GetUserByUsername :one
 
-SELECT id, role, username, email, name, surname, company_id, password, gender, birth_date, created_at, updated_at, language, country, timezone, manager_id, team_id
+SELECT id, username, email, name, surname, company_id, password, gender, birth_date, created_at, updated_at, language, country, timezone, manager_id, team_id
 FROM users
 WHERE username = $1
 LIMIT 1
@@ -194,7 +190,6 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 	var i User
 	err := row.Scan(
 		&i.ID,
-		&i.Role,
 		&i.Username,
 		&i.Email,
 		&i.Name,
@@ -216,7 +211,7 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 
 const listUsers = `-- name: ListUsers :many
 
-SELECT id, role, username, email, name, surname, company_id, password, gender, birth_date, created_at, updated_at, language, country, timezone, manager_id, team_id
+SELECT id, username, email, name, surname, company_id, password, gender, birth_date, created_at, updated_at, language, country, timezone, manager_id, team_id
 FROM users
 ORDER BY id
 LIMIT $1
@@ -239,7 +234,6 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 		var i User
 		if err := rows.Scan(
 			&i.ID,
-			&i.Role,
 			&i.Username,
 			&i.Email,
 			&i.Name,
@@ -274,8 +268,8 @@ SET name = COALESCE($1, name),
     gender = COALESCE($3, gender),
     birth_date = COALESCE($4::timestamp, birth_date),
     language = COALESCE($5, language),
-               country = COALESCE($6, country)
-WHERE id = $7 RETURNING id, role, username, email, name, surname, company_id, password, gender, birth_date, created_at, updated_at, language, country, timezone, manager_id, team_id
+    country = COALESCE($6, country)
+WHERE id = $7 RETURNING id, username, email, name, surname, company_id, password, gender, birth_date, created_at, updated_at, language, country, timezone, manager_id, team_id
 `
 
 type UpdateUserParams struct {
@@ -301,7 +295,6 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 	var i User
 	err := row.Scan(
 		&i.ID,
-		&i.Role,
 		&i.Username,
 		&i.Email,
 		&i.Name,

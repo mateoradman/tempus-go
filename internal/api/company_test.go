@@ -10,13 +10,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
 	"github.com/jackc/pgx/v5"
 	mockdb "github.com/mateoradman/tempus/internal/db/mock"
 	db "github.com/mateoradman/tempus/internal/db/sqlc"
 	"github.com/mateoradman/tempus/internal/token"
 	"github.com/mateoradman/tempus/internal/util"
 	"github.com/stretchr/testify/require"
+	gomock "go.uber.org/mock/gomock"
 )
 
 func requireBodyMatchCompany(t *testing.T, body *bytes.Buffer, company db.Company) {
@@ -37,7 +37,6 @@ func requireBodyMatchCompanyList(t *testing.T, body *bytes.Buffer, companies []d
 	err = json.Unmarshal(data, &gotCompanies)
 	require.NoError(t, err)
 	require.Equal(t, companies, gotCompanies)
-
 }
 
 func randomCompany() db.Company {
@@ -261,7 +260,6 @@ func TestGetCompanyAPI(t *testing.T) {
 			tc.checkResponse(t, recorder)
 		})
 	}
-
 }
 
 func TestDeleteCompanyAPI(t *testing.T) {
@@ -376,7 +374,6 @@ func TestDeleteCompanyAPI(t *testing.T) {
 			tc.checkResponse(t, recorder)
 		})
 	}
-
 }
 
 func TestUpdateCompanyAPI(t *testing.T) {
@@ -650,7 +647,6 @@ func TestListCompaniesAPI(t *testing.T) {
 			tc.checkResponse(t, recorder)
 		})
 	}
-
 }
 
 func TestListCompanyEmployeesAPI(t *testing.T) {
@@ -806,5 +802,4 @@ func TestListCompanyEmployeesAPI(t *testing.T) {
 			tc.checkResponse(t, recorder)
 		})
 	}
-
 }

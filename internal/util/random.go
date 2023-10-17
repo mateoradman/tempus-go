@@ -3,14 +3,10 @@ package util
 import (
 	"fmt"
 	"math/rand"
-	"time"
 
 	"github.com/google/uuid"
+	"github.com/mateoradman/tempus/internal/types"
 )
-
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
 
 var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789")
 
@@ -33,7 +29,13 @@ func RandomEmail() string {
 }
 
 func RandomGender() string {
-	genders := []string{Male, Female, Other, Unknown}
+	genders := []string{types.Male, types.Female, types.Other, types.Unknown}
 	randomInt := RandomInt(0, int64(len(genders)-1))
 	return genders[randomInt]
+}
+
+func RandomLanguage() string {
+	langs := []string{types.English, types.German, types.Croatian}
+	randomInt := RandomInt(0, int64(len(langs)-1))
+	return langs[randomInt]
 }

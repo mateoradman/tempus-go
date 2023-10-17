@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -39,7 +40,7 @@ func (server *Server) getCompany(ctx *gin.Context) {
 
 	company, err := server.store.GetCompany(ctx, req.ID)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
@@ -60,7 +61,7 @@ func (server *Server) deleteCompany(ctx *gin.Context) {
 
 	company, err := server.store.DeleteCompany(ctx, req.ID)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
@@ -89,7 +90,7 @@ func (server *Server) updateCompany(ctx *gin.Context) {
 	}
 	company, err := server.store.UpdateCompany(ctx, arg)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}

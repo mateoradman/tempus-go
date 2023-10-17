@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 	"time"
 
@@ -18,11 +19,11 @@ type UserRequest struct {
 	Surname   string    `json:"surname" binding:"required,min=1"`
 	Email     string    `json:"email" binding:"required,email"`
 	BirthDate time.Time `json:"birth_date" binding:"required,lt"`
+	Gender    string    `json:"gender" binding:"omitempty,gender"`
+	Language  string    `json:"language" binding:"omitempty,language"`
+	Timezone  string    `json:"timezone" binding:"omitempty"`
 	// Optional user information
-	Gender   *string `json:"gender,omitempty" binding:"omitempty,gender"`
-	Language *string `json:"language,omitempty" binding:"omitempty,len=2,ascii"`
-	Country  *string `json:"country,omitempty" binding:"omitempty,len=2,ascii"`
-	Timezone *string `json:"timezone,omitempty" binding:"omitempty,alphanum"`
+	Country *string `json:"country,omitempty" binding:"omitempty,len=2,ascii"`
 	// Foreign keys
 	CompanyID *int64 `json:"company_id"`
 	ManagerID *int64 `json:"manager_id"`
@@ -81,7 +82,7 @@ func (server *Server) getUser(ctx *gin.Context) {
 
 	user, err := server.store.GetUser(ctx, req.ID)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
@@ -102,7 +103,7 @@ func (server *Server) deleteUser(ctx *gin.Context) {
 
 	user, err := server.store.DeleteUser(ctx, req.ID)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
@@ -136,7 +137,7 @@ func (server *Server) updateUser(ctx *gin.Context) {
 
 	user, err := server.store.GetUser(ctx, reqID.ID)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
@@ -211,7 +212,7 @@ func (server *Server) loginUser(ctx *gin.Context) {
 
 	user, err := server.store.GetUserByUsername(ctx, req.Username)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}

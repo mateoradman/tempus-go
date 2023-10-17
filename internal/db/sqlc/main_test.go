@@ -6,23 +6,23 @@ import (
 	"os"
 	"testing"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/mateoradman/tempus/internal/config"
 )
 
-var testQueries *Queries
+var testStore Store
 
 func TestMain(m *testing.M) {
 	config, err := config.LoadConfig("../../..")
 	if err != nil {
 		log.Fatal("cannot load config:", err)
 	}
-	conn, err := pgx.Connect(context.Background(), config.DBSource)
+	conn, err := pgxpool.New(context.Background(), config.DBSource)
 	if err != nil {
 		log.Fatal("cannot connect to database:", err)
 	}
 
-	testQueries = New(conn)
+	testStore = NewStore(conn)
 	exitCode := m.Run()
 	os.Exit(exitCode)
 }

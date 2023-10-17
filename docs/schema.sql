@@ -1,9 +1,9 @@
 -- SQL dump generated using DBML (dbml-lang.org)
 -- Database: PostgreSQL
--- Generated at: 2022-10-23T13:13:06.200Z
+-- Generated at: 2023-10-13T10:34:48.785Z
 
 CREATE TABLE "teams" (
-  "id" bigserial PRIMARY KEY,
+  "id" BIGSERIAL PRIMARY KEY,
   "name" varchar(255) NOT NULL,
   "manager_id" bigint DEFAULT null,
   "created_at" timestamp NOT NULL DEFAULT (now()),
@@ -11,33 +11,26 @@ CREATE TABLE "teams" (
 );
 
 CREATE TABLE "users" (
-  "id" bigserial PRIMARY KEY,
-  "role" int NOT NULL,
+  "id" BIGSERIAL PRIMARY KEY,
   "username" varchar(255) UNIQUE NOT NULL,
   "email" varchar(255) UNIQUE NOT NULL,
   "name" varchar(255) NOT NULL,
   "surname" varchar(255) NOT NULL,
   "company_id" bigint DEFAULT null,
   "password" varchar(255) NOT NULL,
-  "gender" varchar(255) DEFAULT 'unknown',
+  "gender" varchar(255) NOT NULL DEFAULT ("unknown"),
   "birth_date" date NOT NULL,
   "created_at" timestamp NOT NULL DEFAULT (now()),
   "updated_at" timestamp DEFAULT null,
-  "language" varchar(2),
-  "country" varchar(2),
-  "timezone" varchar(255),
+  "language" varchar(2) NOT NULL DEFAULT ("en"),
+  "country" varchar(2) DEFAULT null,
+  "timezone" varchar(64) NOT NULL DEFAULT ("UTC"),
   "manager_id" bigint DEFAULT null,
   "team_id" bigint DEFAULT null
 );
 
-CREATE TABLE "roles" (
-  "id" bigserial PRIMARY KEY,
-  "role" int UNIQUE NOT NULL,
-  "name" varchar(255) UNIQUE NOT NULL
-);
-
 CREATE TABLE "absences" (
-  "id" bigserial PRIMARY KEY,
+  "id" BIGSERIAL PRIMARY KEY,
   "user_id" bigint NOT NULL,
   "start_time" timestamp NOT NULL,
   "end_time" timestamp DEFAULT null,
@@ -49,7 +42,7 @@ CREATE TABLE "absences" (
 );
 
 CREATE TABLE "entries" (
-  "id" bigserial PRIMARY KEY,
+  "id" BIGSERIAL PRIMARY KEY,
   "user_id" bigint NOT NULL,
   "start_time" timestamp NOT NULL,
   "end_time" timestamp DEFAULT null,
@@ -97,11 +90,7 @@ COMMENT ON COLUMN "users"."country" IS 'ISO-2 Country code';
 
 COMMENT ON COLUMN "users"."timezone" IS 'Timezone name';
 
-COMMENT ON COLUMN "roles"."role" IS '>0 && <=5';
-
 ALTER TABLE "teams" ADD FOREIGN KEY ("manager_id") REFERENCES "users" ("id");
-
-ALTER TABLE "users" ADD FOREIGN KEY ("role") REFERENCES "roles" ("role");
 
 ALTER TABLE "users" ADD FOREIGN KEY ("manager_id") REFERENCES "users" ("id");
 

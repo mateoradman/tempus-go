@@ -2,14 +2,16 @@ version: "3"
 
 services:
   postgres:
-    container_name: tempus_db
-    image: postgres:14-alpine
+    container_name: tempus-db
+    ports:
+      - "5432:5432"
+    image: postgres:16
     environment:
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=secret
       - POSTGRES_DB=tempus
   api:
-    container_name: tempus_api
+    container_name: tempus-api
     build:
       context: .
       dockerfile: Dockerfile
@@ -19,11 +21,5 @@ services:
       - DB_SOURCE=postgresql://root:secret@postgres:5432/tempus?sslmode=disable
     depends_on:
       - postgres
-    entrypoint:
-      [
-        "/app/wait-for.sh",
-        "postgres:5432",
-        "--",
-        "/app/start.sh"
-      ]
-    command: [ "/app/main" ]
+    entrypoint: ["/app/wait-for.sh", "postgres:5432", "--", "/app/start.sh"]
+    command: ["/app/main"]

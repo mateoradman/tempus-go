@@ -12,13 +12,13 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang/mock/gomock"
 	"github.com/jackc/pgx/v5"
 	mockdb "github.com/mateoradman/tempus/internal/db/mock"
 	db "github.com/mateoradman/tempus/internal/db/sqlc"
 	"github.com/mateoradman/tempus/internal/token"
 	"github.com/mateoradman/tempus/internal/util"
 	"github.com/stretchr/testify/require"
+	gomock "go.uber.org/mock/gomock"
 )
 
 type eqCreateUserParamsMatcher struct {
@@ -48,6 +48,7 @@ func (e eqCreateUserParamsMatcher) String() string {
 func EqCreateUserParams(arg db.CreateUserParams, password string) gomock.Matcher {
 	return eqCreateUserParamsMatcher{arg, password}
 }
+
 func requireBodyMatchUserList(t *testing.T, body *bytes.Buffer, users []db.User) {
 	data, err := io.ReadAll(body)
 	require.NoError(t, err)
@@ -64,6 +65,7 @@ func requireBodyMatchUser(t *testing.T, body *bytes.Buffer, user db.User) {
 
 	var gotUser db.User
 	err = json.Unmarshal(data, &gotUser)
+	fmt.Sprintln(data)
 	require.NoError(t, err)
 	require.Equal(t, user, gotUser)
 }
@@ -74,8 +76,9 @@ func randomUser() db.User {
 		Name:      util.RandomString(5),
 		Username:  util.RandomString(5),
 		Surname:   util.RandomString(5),
-		Gender:    util.Pointer(util.RandomGender()),
+		Gender:    util.RandomGender(),
 		Email:     util.RandomEmail(),
+		Language:  util.RandomLanguage(),
 		CreatedAt: time.Now().UTC(),
 		BirthDate: time.Now().UTC(),
 	}
@@ -163,12 +166,14 @@ func TestCreateUserAPI(t *testing.T) {
 			jsonData, err := json.Marshal(&tc.arg)
 			require.NoError(t, err)
 
+      t.Logf("jsonData: %s", jsonData)
 			request, err := http.NewRequest(http.MethodPost, "/users", bytes.NewBuffer(jsonData))
 			require.NoError(t, err)
 
 			request.Header.Set("Content-Type", "application/json; charset=UTF-8")
 
 			server.router.ServeHTTP(recorder, request)
+			t.Logf("%v", recorder.Body)
 			tc.checkResponse(t, recorder)
 		})
 	}
@@ -409,7 +414,6 @@ func TestGetUserAPI(t *testing.T) {
 			tc.checkResponse(t, recorder)
 		})
 	}
-
 }
 
 func TestDeleteUserAPI(t *testing.T) {
@@ -524,7 +528,6 @@ func TestDeleteUserAPI(t *testing.T) {
 			tc.checkResponse(t, recorder)
 		})
 	}
-
 }
 
 func TestUpdateUserAPI(t *testing.T) {
@@ -533,9 +536,9 @@ func TestUpdateUserAPI(t *testing.T) {
 		ID:        user.ID,
 		Name:      &user.Name,
 		Surname:   &user.Surname,
-		Gender:    user.Gender,
+		Gender:    &user.Gender,
 		BirthDate: &user.BirthDate,
-		Language:  user.Language,
+		Language:  &user.Language,
 		Country:   user.Country,
 	}
 
@@ -802,5 +805,4 @@ func TestListUsersAPI(t *testing.T) {
 			tc.checkResponse(t, recorder)
 		})
 	}
-
 }

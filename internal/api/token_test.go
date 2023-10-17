@@ -10,13 +10,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	mockdb "github.com/mateoradman/tempus/internal/db/mock"
 	db "github.com/mateoradman/tempus/internal/db/sqlc"
 	"github.com/mateoradman/tempus/internal/util"
 	"github.com/stretchr/testify/require"
+	gomock "go.uber.org/mock/gomock"
 )
 
 func requireBodyMatchRefreshToken(t *testing.T, body *bytes.Buffer, server *Server) {

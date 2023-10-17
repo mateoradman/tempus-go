@@ -21,14 +21,14 @@ func createRandomAbsence(t *testing.T) Absence {
 		EndTime:   &end,
 	}
 
-	absence, err := testQueries.CreateAbsence(context.Background(), arg)
+	absence, err := testStore.CreateAbsence(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, absence)
 	require.NotZero(t, absence.ID)
 	require.Equal(t, arg.UserID, absence.UserID)
 	require.Equal(t, arg.Paid, absence.Paid)
-	require.Equal(t, arg.StartTime, absence.StartTime)
-	require.Equal(t, arg.EndTime, absence.EndTime)
+	require.WithinDuration(t, arg.StartTime, absence.StartTime, time.Second)
+	require.WithinDuration(t, *arg.EndTime, *absence.EndTime, time.Second)
 	require.Nil(t, absence.ApprovedByID)
 	require.WithinDuration(t, time.Now(), absence.CreatedAt, 2*time.Second)
 	require.Nil(t, absence.UpdatedAt)
@@ -42,7 +42,7 @@ func TestCreateAbsence(t *testing.T) {
 
 func TestGetAbsence(t *testing.T) {
 	absence := createRandomAbsence(t)
-	gotAbsence, err := testQueries.GetAbsence(context.Background(), absence.ID)
+	gotAbsence, err := testStore.GetAbsence(context.Background(), absence.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, gotAbsence)
 	require.Equal(t, absence.ID, gotAbsence.ID)
@@ -68,7 +68,7 @@ func TestUpdateAbsence(t *testing.T) {
 		EndTime:   &end,
 	}
 
-	updatedAbsence, err := testQueries.UpdateAbsence(context.Background(), arg)
+	updatedAbsence, err := testStore.UpdateAbsence(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, updatedAbsence)
 	require.Equal(t, absence.ID, updatedAbsence.ID)
@@ -83,7 +83,7 @@ func TestUpdateAbsence(t *testing.T) {
 
 func TestDeleteAbsence(t *testing.T) {
 	absence := createRandomAbsence(t)
-	deletedAbsence, err := testQueries.DeleteAbsence(context.Background(), absence.ID)
+	deletedAbsence, err := testStore.DeleteAbsence(context.Background(), absence.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, deletedAbsence)
 	require.Equal(t, absence.ID, deletedAbsence.ID)
@@ -106,7 +106,7 @@ func TestListAbsences(t *testing.T) {
 		Offset: 0,
 	}
 
-	absences, err := testQueries.ListAbsences(context.Background(), arg)
+	absences, err := testStore.ListAbsences(context.Background(), arg)
 	require.NoError(t, err)
 	require.Len(t, absences, int(arg.Limit))
 
@@ -125,7 +125,7 @@ func TestListUserAbsences(t *testing.T) {
 			Paid:      false,
 			StartTime: today,
 		}
-		absence, err := testQueries.CreateAbsence(context.Background(), arg)
+		absence, err := testStore.CreateAbsence(context.Background(), arg)
 		require.NoError(t, err)
 		absences = append(absences, absence)
 	}
@@ -134,7 +134,7 @@ func TestListUserAbsences(t *testing.T) {
 		Limit:  100,
 		Offset: 0,
 	}
-	userAbsences, err := testQueries.ListUserAbsences(context.Background(), arg)
+	userAbsences, err := testStore.ListUserAbsences(context.Background(), arg)
 	require.NoError(t, err)
 	require.Subset(t, userAbsences, absences)
 }

@@ -107,7 +107,7 @@ func (q *Queries) ListCompanies(ctx context.Context, arg ListCompaniesParams) ([
 }
 
 const listCompanyEmployees = `-- name: ListCompanyEmployees :many
-SELECT id, role, username, email, name, surname, company_id, password, gender, birth_date, created_at, updated_at, language, country, timezone, manager_id, team_id
+SELECT id, username, email, name, surname, company_id, password, gender, birth_date, created_at, updated_at, language, country, timezone, manager_id, team_id
 FROM users
 WHERE users.company_id =
     (SELECT companies.id
@@ -135,7 +135,6 @@ func (q *Queries) ListCompanyEmployees(ctx context.Context, arg ListCompanyEmplo
 		var i User
 		if err := rows.Scan(
 			&i.ID,
-			&i.Role,
 			&i.Username,
 			&i.Email,
 			&i.Name,

@@ -17,9 +17,9 @@ func seedSuperUser(ctx context.Context, q *Queries, config config.Config) error 
 	} else if err != pgx.ErrNoRows {
 		// if error is not that the user doesn't exist, return it
 		return err
-	} 
+	}
 	// else create a new user
-	
+
 	hashedPassword, err := util.HashPassword(config.SuperUserPassword)
 	if err != nil {
 		return err
@@ -32,6 +32,10 @@ func seedSuperUser(ctx context.Context, q *Queries, config config.Config) error 
 		Surname:   "Admin",
 		Password:  hashedPassword,
 		BirthDate: time.Now(),
+		Gender:    util.RandomGender(),
+		Language:  util.RandomLanguage(),
+		Timezone:  "Europe/Zagreb",
+		Country:   util.Pointer("HR"),
 	}
 
 	_, err = q.CreateUser(ctx, arg)

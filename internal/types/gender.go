@@ -1,4 +1,4 @@
-package util
+package types
 
 // Constants for all supported gender choices
 const (

@@ -16,7 +16,7 @@ func createRandomTeam(t *testing.T) Team {
 		ManagerID: &user.ID,
 	}
 
-	team, err := testQueries.CreateTeam(context.Background(), arg)
+	team, err := testStore.CreateTeam(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, team)
 	require.Equal(t, arg.Name, team.Name)
@@ -34,7 +34,7 @@ func TestCreateTeam(t *testing.T) {
 
 func TestGetTeam(t *testing.T) {
 	team := createRandomTeam(t)
-	gotTeam, err := testQueries.GetTeam(context.Background(), team.ID)
+	gotTeam, err := testStore.GetTeam(context.Background(), team.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, gotTeam)
 	require.Equal(t, team.ID, gotTeam.ID)
@@ -55,7 +55,7 @@ func TestUpdateTeam(t *testing.T) {
 		ManagerID: &manager.ID,
 	}
 
-	updatedTeam, err := testQueries.UpdateTeam(context.Background(), arg)
+	updatedTeam, err := testStore.UpdateTeam(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, updatedTeam)
 	require.Equal(t, team.ID, updatedTeam.ID)
@@ -69,7 +69,7 @@ func TestUpdateTeam(t *testing.T) {
 
 func TestDeleteTeam(t *testing.T) {
 	team := createRandomTeam(t)
-	deletedTeam, err := testQueries.DeleteTeam(context.Background(), team.ID)
+	deletedTeam, err := testStore.DeleteTeam(context.Background(), team.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, deletedTeam)
 	require.Equal(t, team.ID, deletedTeam.ID)
@@ -90,7 +90,7 @@ func TestListTeams(t *testing.T) {
 		Offset: 0,
 	}
 
-	teams, err := testQueries.ListTeams(context.Background(), arg)
+	teams, err := testStore.ListTeams(context.Background(), arg)
 	require.NoError(t, err)
 	require.Len(t, teams, int(arg.Limit))
 
@@ -111,7 +111,7 @@ func TestListTeamMembers(t *testing.T) {
 		Limit:  100,
 		Offset: 0,
 	}
-	employees, err := testQueries.ListTeamMembers(context.Background(), arg)
+	employees, err := testStore.ListTeamMembers(context.Background(), arg)
 	require.NoError(t, err)
 	require.Subset(t, employees, users)
 }

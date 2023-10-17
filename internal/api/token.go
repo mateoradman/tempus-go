@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -33,7 +34,7 @@ func (server *Server) refreshToken(ctx *gin.Context) {
 
 	session, err := server.store.GetSession(ctx, refreshPayload.ID)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))

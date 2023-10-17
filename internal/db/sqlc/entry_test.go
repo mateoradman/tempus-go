@@ -17,7 +17,7 @@ func createRandomEntry(t *testing.T) Entry {
 		StartTime: today,
 	}
 
-	entry, err := testQueries.CreateEntry(context.Background(), arg)
+	entry, err := testStore.CreateEntry(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, entry)
 	require.NotZero(t, entry.ID)
@@ -36,7 +36,7 @@ func TestCreateEntry(t *testing.T) {
 
 func TestGetEntry(t *testing.T) {
 	entry := createRandomEntry(t)
-	gotEntry, err := testQueries.GetEntry(context.Background(), entry.ID)
+	gotEntry, err := testStore.GetEntry(context.Background(), entry.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, gotEntry)
 	require.Equal(t, entry.ID, gotEntry.ID)
@@ -58,7 +58,7 @@ func TestUpdateEntry(t *testing.T) {
 		EndTime:   entry.EndTime,
 	}
 
-	updatedEntry, err := testQueries.UpdateEntry(context.Background(), arg)
+	updatedEntry, err := testStore.UpdateEntry(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, updatedEntry)
 	require.Equal(t, entry.ID, updatedEntry.ID)
@@ -72,7 +72,7 @@ func TestUpdateEntry(t *testing.T) {
 
 func TestDeleteEntry(t *testing.T) {
 	entry := createRandomEntry(t)
-	deletedEntry, err := testQueries.DeleteEntry(context.Background(), entry.ID)
+	deletedEntry, err := testStore.DeleteEntry(context.Background(), entry.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, deletedEntry)
 	require.Equal(t, entry.ID, deletedEntry.ID)
@@ -94,7 +94,7 @@ func TestListEntries(t *testing.T) {
 		Offset: 0,
 	}
 
-	entries, err := testQueries.ListEntries(context.Background(), arg)
+	entries, err := testStore.ListEntries(context.Background(), arg)
 	require.NoError(t, err)
 	require.Len(t, entries, int(arg.Limit))
 
@@ -112,7 +112,7 @@ func TestListUserEntries(t *testing.T) {
 			UserID:    user.ID,
 			StartTime: today,
 		}
-		entry, err := testQueries.CreateEntry(context.Background(), arg)
+		entry, err := testStore.CreateEntry(context.Background(), arg)
 		require.NoError(t, err)
 		entries = append(entries, entry)
 	}
@@ -121,7 +121,7 @@ func TestListUserEntries(t *testing.T) {
 		Limit:  100,
 		Offset: 0,
 	}
-	userEntries, err := testQueries.ListUserEntries(context.Background(), arg)
+	userEntries, err := testStore.ListUserEntries(context.Background(), arg)
 	require.NoError(t, err)
 	require.Subset(t, userEntries, entries)
 }

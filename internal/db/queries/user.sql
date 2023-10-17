@@ -52,7 +52,7 @@ SET name = COALESCE(sqlc.narg(name), name),
     gender = COALESCE(sqlc.narg(gender), gender),
     birth_date = COALESCE(sqlc.narg(birth_date)::timestamp, birth_date),
     language = COALESCE(sqlc.narg(language), language),
-               country = COALESCE(sqlc.narg(country), country)
+    country = COALESCE(sqlc.narg(country), country)
 WHERE id = sqlc.arg(id) RETURNING *;
 
 -- name: DeleteUser :one

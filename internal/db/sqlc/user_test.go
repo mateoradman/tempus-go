@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/mateoradman/tempus/internal/types"
 	"github.com/mateoradman/tempus/internal/util"
 	"github.com/stretchr/testify/require"
 )
@@ -20,13 +21,15 @@ func createRandomUser(t *testing.T, company_id, team_id *int64) User {
 		Name:      util.RandomString(25),
 		Surname:   util.RandomString(25),
 		Password:  hashedPassword,
-		Gender:    util.Pointer(util.RandomGender()),
+		Gender:    util.RandomGender(),
+		Language:  types.German,
 		BirthDate: birthDate,
 		CompanyID: company_id,
 		TeamID:    team_id,
+		Timezone:  "Europe/Zagreb",
 	}
 
-	user, err := testQueries.CreateUser(context.Background(), arg)
+	user, err := testStore.CreateUser(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, user)
 	require.Equal(t, arg.Username, user.Username)
@@ -36,13 +39,13 @@ func createRandomUser(t *testing.T, company_id, team_id *int64) User {
 	require.Equal(t, arg.Password, user.Password)
 	require.Equal(t, arg.Gender, user.Gender)
 	require.Equal(t, arg.BirthDate, user.BirthDate)
-	require.Nil(t, user.Language)
+	require.Equal(t, arg.Language, user.Language)
 	require.Nil(t, user.Country)
 	require.WithinDuration(t, time.Now().UTC(), user.CreatedAt, 2*time.Second)
+	require.Equal(t, arg.Timezone, user.Timezone)
 
 	// test if default values were correctly set
 	require.Nil(t, user.UpdatedAt)
-	require.Nil(t, user.Timezone)
 	require.Nil(t, user.ManagerID)
 	require.Equal(t, user.CompanyID, company_id)
 	require.Equal(t, user.TeamID, team_id)
@@ -61,10 +64,10 @@ func validateGetQuery(t *testing.T, user, gotUser User) {
 	require.Equal(t, user.BirthDate, gotUser.BirthDate)
 	require.Equal(t, user.Language, gotUser.Language)
 	require.Equal(t, user.Country, gotUser.Country)
+	require.Equal(t, user.Timezone, gotUser.Timezone)
 	// test if default values were correctly set
 	require.Equal(t, user.UpdatedAt, gotUser.UpdatedAt)
 	require.Nil(t, user.CompanyID)
-	require.Nil(t, user.Timezone)
 	require.Nil(t, user.ManagerID)
 	require.Nil(t, user.TeamID)
 }
@@ -75,21 +78,21 @@ func TestCreateUser(t *testing.T) {
 
 func TestGetUser(t *testing.T) {
 	user := createRandomUser(t, nil, nil)
-	gotUser, err := testQueries.GetUser(context.Background(), user.ID)
+	gotUser, err := testStore.GetUser(context.Background(), user.ID)
 	require.NoError(t, err)
 	validateGetQuery(t, user, gotUser)
 }
 
 func TestGetUserByEmail(t *testing.T) {
 	user := createRandomUser(t, nil, nil)
-	gotUser, err := testQueries.GetUserByEmail(context.Background(), user.Email)
+	gotUser, err := testStore.GetUserByEmail(context.Background(), user.Email)
 	require.NoError(t, err)
 	validateGetQuery(t, user, gotUser)
 }
 
 func TestGetUserByUsername(t *testing.T) {
 	user := createRandomUser(t, nil, nil)
-	gotUser, err := testQueries.GetUserByUsername(context.Background(), user.Username)
+	gotUser, err := testStore.GetUserByUsername(context.Background(), user.Username)
 	require.NoError(t, err)
 	validateGetQuery(t, user, gotUser)
 }
@@ -102,21 +105,21 @@ func TestUpdateUser(t *testing.T) {
 		ID:        user.ID,
 		Name:      &randomString,
 		Surname:   &randomString,
-		Gender:    user.Gender,
+		Gender:    &user.Gender,
 		BirthDate: &user.BirthDate,
-		Language:  util.Pointer("en"),
+		Language:  util.Pointer(types.English),
 		Country:   user.Country,
 	}
 
-	updatedUser, err := testQueries.UpdateUser(context.Background(), arg)
+	updatedUser, err := testStore.UpdateUser(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, updatedUser)
 	require.Equal(t, arg.ID, updatedUser.ID)
 	require.Equal(t, *arg.Name, updatedUser.Name)
 	require.Equal(t, *arg.Surname, updatedUser.Surname)
-	require.Equal(t, arg.Gender, updatedUser.Gender)
+	require.Equal(t, *arg.Gender, updatedUser.Gender)
 	require.Equal(t, *arg.BirthDate, updatedUser.BirthDate)
-	require.Equal(t, arg.Language, updatedUser.Language)
+	require.Equal(t, *arg.Language, updatedUser.Language)
 	require.Equal(t, arg.Country, updatedUser.Country)
 
 	// validate times remain unchanged
@@ -127,7 +130,7 @@ func TestUpdateUser(t *testing.T) {
 
 func TestDeleteUser(t *testing.T) {
 	user := createRandomUser(t, nil, nil)
-	deletedUser, err := testQueries.DeleteUser(context.Background(), user.ID)
+	deletedUser, err := testStore.DeleteUser(context.Background(), user.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, deletedUser)
 	require.Equal(t, user.ID, deletedUser.ID)
@@ -150,7 +153,7 @@ func TestListUsers(t *testing.T) {
 		Offset: 0,
 	}
 
-	users, err := testQueries.ListUsers(context.Background(), arg)
+	users, err := testStore.ListUsers(context.Background(), arg)
 	require.NoError(t, err)
 	require.Len(t, users, int(arg.Limit))
 

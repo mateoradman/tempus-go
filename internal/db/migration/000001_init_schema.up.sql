@@ -1,70 +1,56 @@
-CREATE TABLE "roles" (
-  "id" bigserial PRIMARY KEY,
-  "role" int UNIQUE NOT NULL,
-  "name" varchar(255) UNIQUE NOT NULL
-);
-
--- Default roles
-INSERT INTO roles (role, name) VALUES (1, 'Superuser');
-INSERT INTO roles (role, name) VALUES (2, 'Admin');
-INSERT INTO roles (role, name) VALUES (3, 'Company admin');
-INSERT INTO roles (role, name) VALUES (4, 'Team admin');
-INSERT INTO roles (role, name) VALUES (5, 'Normal user');
-
 CREATE TABLE "teams" (
-  "id" bigserial PRIMARY KEY,
+  "id" BIGSERIAL PRIMARY KEY,
   "name" varchar(255) NOT NULL,
-  "manager_id" bigint DEFAULT null,
+  "manager_id" bigint DEFAULT NULL,
   "created_at" timestamp NOT NULL DEFAULT (now()),
-  "updated_at" timestamp DEFAULT null
+  "updated_at" timestamp DEFAULT NULL
 );
 
 CREATE TABLE "users" (
-  "id" bigserial PRIMARY KEY,
-  "role" int NOT NULL DEFAULT 5,
+  "id" BIGSERIAL PRIMARY KEY,
   "username" varchar(255) UNIQUE NOT NULL,
   "email" varchar(255) UNIQUE NOT NULL,
   "name" varchar(255) NOT NULL,
   "surname" varchar(255) NOT NULL,
-  "company_id" bigint DEFAULT null,
+  "company_id" bigint DEFAULT NULL,
   "password" varchar(255) NOT NULL,
-  "gender" varchar(255) DEFAULT 'unknown',
+  "gender" varchar(255) NOT NULL DEFAULT ('unknown'),
   "birth_date" date NOT NULL,
   "created_at" timestamp NOT NULL DEFAULT (now()),
-  "updated_at" timestamp DEFAULT null,
-  "language" varchar(2),
-  "country" varchar(2),
-  "timezone" varchar(255),
-  "manager_id" bigint DEFAULT null,
-  "team_id" bigint DEFAULT null
+  "updated_at" timestamp DEFAULT NULL,
+  "language" varchar(2) NOT NULL DEFAULT ('en'),
+  "country" varchar(2) DEFAULT NULL,
+  "timezone" varchar(64) NOT NULL DEFAULT ('UTC'),
+  "manager_id" bigint DEFAULT NULL,
+  "team_id" bigint DEFAULT NULL
 );
 
 CREATE TABLE "absences" (
-  "id" bigserial PRIMARY KEY,
+  "id" BIGSERIAL PRIMARY KEY,
   "user_id" bigint NOT NULL,
   "start_time" timestamp NOT NULL,
-  "end_time" timestamp DEFAULT null,
+  "end_time" timestamp DEFAULT NULL,
   "reason" varchar(255) NOT NULL,
   "paid" boolean NOT NULL DEFAULT true,
   "created_at" timestamp NOT NULL DEFAULT (now()),
-  "updated_at" timestamp DEFAULT null,
-  "approved_by_id" bigint DEFAULT null
+  "updated_at" timestamp DEFAULT NULL,
+  "approved_by_id" bigint DEFAULT NULL
 );
 
 CREATE TABLE "entries" (
-  "id" bigserial PRIMARY KEY,
+  "id" BIGSERIAL PRIMARY KEY,
   "user_id" bigint NOT NULL,
   "start_time" timestamp NOT NULL,
-  "end_time" timestamp DEFAULT null,
+  "end_time" timestamp DEFAULT NULL,
   "created_at" timestamp NOT NULL DEFAULT (now()),
-  "updated_at" timestamp DEFAULT null
+  "updated_at" timestamp DEFAULT NULL
 );
 
 CREATE TABLE "companies" (
   "id" BIGSERIAL PRIMARY KEY,
   "name" varchar(255) NOT NULL,
   "created_at" timestamp NOT NULL DEFAULT (now()),
-  "updated_at" timestamp DEFAULT null
+  "updated_at" timestamp DEFAULT NULL
 );
 
 CREATE TABLE "sessions" (
@@ -116,7 +102,7 @@ ALTER TABLE "absences" ADD CONSTRAINT "user_absences" FOREIGN KEY ("user_id") RE
 
 ALTER TABLE "sessions" ADD CONSTRAINT "user_sessions" FOREIGN KEY ("username") REFERENCES "users" ("username") ON DELETE CASCADE;
 
--- Trigers for saving the updated_at time 
+-- Triggers for saving the updated_at time 
 
 CREATE OR REPLACE FUNCTION trigger_set_timestamp()
 RETURNS TRIGGER AS $$

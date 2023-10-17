@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/mateoradman/tempus/internal/api"
 	"github.com/mateoradman/tempus/internal/config"
 	db "github.com/mateoradman/tempus/internal/db/sqlc"
@@ -16,7 +16,7 @@ func main() {
 		log.Fatal("cannot load config:", err)
 	}
 
-	conn, err := pgx.Connect(context.Background(), config.DBSource)
+	conn, err := pgxpool.New(context.Background(), config.DBSource)
 	if err != nil {
 		log.Fatal("cannot connect to database:", err)
 	}

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 	"time"
 
@@ -48,7 +49,7 @@ func (server *Server) getEntry(ctx *gin.Context) {
 
 	entry, err := server.store.GetEntry(ctx, req.ID)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
@@ -69,7 +70,7 @@ func (server *Server) deleteEntry(ctx *gin.Context) {
 
 	entry, err := server.store.DeleteEntry(ctx, req.ID)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
@@ -93,14 +94,14 @@ func (server *Server) updateEntry(ctx *gin.Context) {
 	}
 
 	arg := db.UpdateEntryParams{
-		ID:   reqID.ID,
-		UserID: req.UserID,
+		ID:        reqID.ID,
+		UserID:    req.UserID,
 		StartTime: req.StartTime,
-		EndTime: req.EndTime,
+		EndTime:   req.EndTime,
 	}
 	entry, err := server.store.UpdateEntry(ctx, arg)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}

@@ -12,7 +12,7 @@ import (
 func createRandomCompany(t *testing.T) Company {
 	name := util.RandomString(200)
 
-	company, err := testQueries.CreateCompany(context.Background(), name)
+	company, err := testStore.CreateCompany(context.Background(), name)
 	require.NoError(t, err)
 	require.NotEmpty(t, company)
 	require.Equal(t, name, company.Name)
@@ -30,7 +30,7 @@ func TestCreateCompany(t *testing.T) {
 
 func TestGetCompany(t *testing.T) {
 	company := createRandomCompany(t)
-	gotCompany, err := testQueries.GetCompany(context.Background(), company.ID)
+	gotCompany, err := testStore.GetCompany(context.Background(), company.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, gotCompany)
 	require.Equal(t, company.ID, gotCompany.ID)
@@ -49,7 +49,7 @@ func TestUpdateCompany(t *testing.T) {
 		Name: name,
 	}
 
-	updatedCompany, err := testQueries.UpdateCompany(context.Background(), arg)
+	updatedCompany, err := testStore.UpdateCompany(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, updatedCompany)
 	require.Equal(t, company.ID, updatedCompany.ID)
@@ -61,7 +61,7 @@ func TestUpdateCompany(t *testing.T) {
 
 func TestDeleteCompany(t *testing.T) {
 	company := createRandomCompany(t)
-	deletedCompany, err := testQueries.DeleteCompany(context.Background(), company.ID)
+	deletedCompany, err := testStore.DeleteCompany(context.Background(), company.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, deletedCompany)
 	require.Equal(t, company.ID, deletedCompany.ID)
@@ -81,7 +81,7 @@ func TestListCompanies(t *testing.T) {
 		Offset: 0,
 	}
 
-	companies, err := testQueries.ListCompanies(context.Background(), arg)
+	companies, err := testStore.ListCompanies(context.Background(), arg)
 	require.NoError(t, err)
 	require.Len(t, companies, int(arg.Limit))
 
@@ -99,12 +99,12 @@ func TestListEmployee(t *testing.T) {
 			ID:        user.ID,
 			Name:      &user.Name,
 			Surname:   &user.Surname,
-			Gender:    user.Gender,
+			Gender:    &user.Gender,
 			BirthDate: &user.BirthDate,
-			Language:  user.Language,
+			Language:  &user.Language,
 			Country:   user.Country,
 		}
-		updatedUser, err := testQueries.UpdateUser(context.Background(), arg)
+		updatedUser, err := testStore.UpdateUser(context.Background(), arg)
 		require.NoError(t, err)
 		users = append(users, updatedUser)
 	}
@@ -113,7 +113,7 @@ func TestListEmployee(t *testing.T) {
 		Limit:  100,
 		Offset: 0,
 	}
-	employees, err := testQueries.ListCompanyEmployees(context.Background(), arg)
+	employees, err := testStore.ListCompanyEmployees(context.Background(), arg)
 	require.NoError(t, err)
 	require.Subset(t, employees, users)
 }

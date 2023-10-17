@@ -1,10 +1,10 @@
 DB_URL=postgresql://root:secret@localhost:5432/tempus?sslmode=disable
 
 postgres:
-	docker run --name postgres14 -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:14-alpine
+	docker run --name tempus-db -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:16
 
 createdb:
-	docker exec -it postgres14 createdb --username=root --owner=root tempus
+	docker exec -it tempus-db createdb --username=root --owner=root tempus
 
 migrateup:
 	migrate -path internal/db/migration -database "$(DB_URL)" -verbose up
@@ -13,7 +13,7 @@ migratedown:
 	migrate -path internal/db/migration -database "$(DB_URL)" -verbose down
 
 dropdb:
-	docker exec -it postgres14 dropdb tempus
+	docker exec -it tempus-db dropdb tempus
 
 sqlc:
 	sqlc generate
@@ -25,7 +25,7 @@ test:
 	go test -v -cover ./...
 
 mock:
-	mockgen -package mockdb -destination internal/db/mock/store.go github.com/mateoradman/tempus/internal/db/sqlc Store
+	mockgen -source ./internal/db/sqlc/store.go -package mockdb -destination internal/db/mock/store.go Store
 
 db_docs:
 	dbdocs build doc/db.dbml

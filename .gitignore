@@ -28,3 +28,4 @@ go.work
 # IDE folders
 .idea/
 .vscode/
+tmp

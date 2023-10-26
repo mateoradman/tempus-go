@@ -33,8 +33,8 @@ func NewServer(config config.Config, store db.Store) (*Server, error) {
 	}
 
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		v.RegisterValidation("gender", validGender)
-		v.RegisterValidation("language", validLanguage)
+		_ = v.RegisterValidation("gender", validGender)
+		_ = v.RegisterValidation("language", validLanguage)
 	}
 
 	server.setupRouter()

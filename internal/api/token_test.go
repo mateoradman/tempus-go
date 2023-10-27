@@ -193,7 +193,7 @@ func TestRefreshTokenAPI(t *testing.T) {
 			recorder := httptest.NewRecorder()
 
 			// create a fake token
-			token, payload, err := server.tokenMaker.CreateToken(user.Username, 24*time.Hour)
+			token, payload, err := server.tokenMaker.CreateToken(user.Username, user.Role, 24*time.Hour)
 			require.NoError(t, err)
 			// set the refresh token to the newly created token
 			session.RefreshToken = token

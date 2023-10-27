@@ -17,6 +17,7 @@ Indexes {
 
 Table "users" {
   "id" bigserial [pk, increment]
+  "role" varchar(64) [not null, default: 'employee']
   "username" varchar(255) [unique, not null]
   "email" varchar(255) [unique, not null]
   "name" varchar(255) [not null]
@@ -27,9 +28,9 @@ Table "users" {
   "birth_date" date [not null]
   "created_at" timestamp [not null, default: `now()`]
   "updated_at" timestamp [default: null]
-  "language" varchar(2) [not null, default: `"en"`, note: 'ISO-2 language code']
+  "language" varchar(2) [not null, default: 'en', note: 'ISO-2 language code']
   "country" varchar(2) [default: null, note: 'ISO-2 Country code']
-  "timezone" varchar(64) [not null, default: `"UTC"`, note: 'Timezone name']
+  "timezone" varchar(64) [not null, default: 'UTC', note: 'Timezone name']
   "manager_id" bigint [default: null]
   "team_id" bigint [default: null]
 

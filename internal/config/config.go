@@ -9,6 +9,7 @@ import (
 // Configuration loaded from a .env file
 type Config struct {
 	DBSource             string        `mapstructure:"DB_URL"`
+	MigrationURL         string        `mapstructure:"MIGRATION_URL"`
 	ServerAddress        string        `mapstructure:"SERVER_ADDRESS"`
 	TokenSymmetricKey    string        `mapstructure:"TOKEN_SYMMETRIC_KEY"`
 	AccessTokenDuration  time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`

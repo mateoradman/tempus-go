@@ -1,6 +1,6 @@
 -- SQL dump generated using DBML (dbml-lang.org)
 -- Database: PostgreSQL
--- Generated at: 2023-10-13T10:34:48.785Z
+-- Generated at: 2023-10-27T07:13:22.542Z
 
 CREATE TABLE "teams" (
   "id" BIGSERIAL PRIMARY KEY,
@@ -12,19 +12,20 @@ CREATE TABLE "teams" (
 
 CREATE TABLE "users" (
   "id" BIGSERIAL PRIMARY KEY,
+  "role" varchar(64) NOT NULL DEFAULT 'employee',
   "username" varchar(255) UNIQUE NOT NULL,
   "email" varchar(255) UNIQUE NOT NULL,
   "name" varchar(255) NOT NULL,
   "surname" varchar(255) NOT NULL,
   "company_id" bigint DEFAULT null,
   "password" varchar(255) NOT NULL,
-  "gender" varchar(255) NOT NULL DEFAULT ("unknown"),
+  "gender" varchar(255) NOT NULL DEFAULT 'unknown',
   "birth_date" date NOT NULL,
   "created_at" timestamp NOT NULL DEFAULT (now()),
   "updated_at" timestamp DEFAULT null,
-  "language" varchar(2) NOT NULL DEFAULT ("en"),
+  "language" varchar(2) NOT NULL DEFAULT 'en',
   "country" varchar(2) DEFAULT null,
-  "timezone" varchar(64) NOT NULL DEFAULT ("UTC"),
+  "timezone" varchar(64) NOT NULL DEFAULT 'UTC',
   "manager_id" bigint DEFAULT null,
   "team_id" bigint DEFAULT null
 );

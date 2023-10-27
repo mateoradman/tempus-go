@@ -68,7 +68,7 @@ func TestCreateCompanyAPI(t *testing.T) {
 					Return(company, nil)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusCreated, recorder.Code)
@@ -85,7 +85,7 @@ func TestCreateCompanyAPI(t *testing.T) {
 					Return(db.Company{}, pgx.ErrTxClosed)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -100,7 +100,7 @@ func TestCreateCompanyAPI(t *testing.T) {
 					Times(0)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -169,7 +169,7 @@ func TestGetCompanyAPI(t *testing.T) {
 					Return(company, nil)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -186,7 +186,7 @@ func TestGetCompanyAPI(t *testing.T) {
 					Return(db.Company{}, pgx.ErrNoRows)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)
@@ -202,7 +202,7 @@ func TestGetCompanyAPI(t *testing.T) {
 					Return(db.Company{}, pgx.ErrTxClosed)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -217,7 +217,7 @@ func TestGetCompanyAPI(t *testing.T) {
 					Times(0)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -283,7 +283,7 @@ func TestDeleteCompanyAPI(t *testing.T) {
 					Return(company, nil)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -300,7 +300,7 @@ func TestDeleteCompanyAPI(t *testing.T) {
 					Return(db.Company{}, pgx.ErrNoRows)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)
@@ -316,7 +316,7 @@ func TestDeleteCompanyAPI(t *testing.T) {
 					Return(db.Company{}, pgx.ErrTxClosed)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -331,7 +331,7 @@ func TestDeleteCompanyAPI(t *testing.T) {
 					Times(0)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -403,7 +403,7 @@ func TestUpdateCompanyAPI(t *testing.T) {
 					Return(company, nil)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -421,7 +421,7 @@ func TestUpdateCompanyAPI(t *testing.T) {
 					Return(db.Company{}, pgx.ErrNoRows)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)
@@ -438,7 +438,7 @@ func TestUpdateCompanyAPI(t *testing.T) {
 					Return(db.Company{}, pgx.ErrTxClosed)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -454,7 +454,7 @@ func TestUpdateCompanyAPI(t *testing.T) {
 					Times(0)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -470,7 +470,7 @@ func TestUpdateCompanyAPI(t *testing.T) {
 					Times(0)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -547,7 +547,7 @@ func TestListCompaniesAPI(t *testing.T) {
 					Return(returnVal, nil)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -565,7 +565,7 @@ func TestListCompaniesAPI(t *testing.T) {
 					Return(returnVal, pgx.ErrTxClosed)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -581,7 +581,7 @@ func TestListCompaniesAPI(t *testing.T) {
 					Times(0)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -597,7 +597,7 @@ func TestListCompaniesAPI(t *testing.T) {
 					Times(0)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -680,7 +680,7 @@ func TestListCompanyEmployeesAPI(t *testing.T) {
 					Return(returnVal, nil)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -699,7 +699,7 @@ func TestListCompanyEmployeesAPI(t *testing.T) {
 					Return(returnVal, pgx.ErrTxClosed)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -716,7 +716,7 @@ func TestListCompanyEmployeesAPI(t *testing.T) {
 					Times(0)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -733,7 +733,7 @@ func TestListCompanyEmployeesAPI(t *testing.T) {
 					Times(0)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -750,7 +750,7 @@ func TestListCompanyEmployeesAPI(t *testing.T) {
 					Times(0)
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user.Username, time.Minute)
+				addAuthorization(t, request, tokenMaker, util.AuthTypeBearer, user, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)

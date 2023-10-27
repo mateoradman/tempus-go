@@ -63,6 +63,11 @@ func (server *Server) setupRouter() {
 	authRoutes.PATCH("/users/:id", server.updateUser)
 	authRoutes.GET("/users", server.listUsers)
 
+	authRoutes.POST("/entries", server.createEntry)
+	authRoutes.GET("/entries/:id", server.getEntry)
+	authRoutes.DELETE("/entries/:id", server.deleteEntry)
+	authRoutes.PUT("/entries/:id", server.updateEntry)
+	authRoutes.GET("/entries", server.listEntries)
 	server.router = router
 }
 

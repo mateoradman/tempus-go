@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/mateoradman/tempus/internal/types"
 	"github.com/mateoradman/tempus/internal/util"
 	"github.com/stretchr/testify/require"
 )
@@ -18,7 +19,7 @@ func TestPasetoMaker(t *testing.T) {
 	maker := getPasetoMaker(t)
 
 	username := util.RandomString(25)
-	role := util.EmployeeRole
+	role := types.EmployeeRole
 	duration := time.Minute
 
 	issuedAt := time.Now()
@@ -47,7 +48,7 @@ func TestPasetoMaker(t *testing.T) {
 func TestExpiredPasetoToken(t *testing.T) {
 	maker := getPasetoMaker(t)
 
-	token, payload, err := maker.CreateToken(util.RandomString(25), util.EmployeeRole, -time.Minute)
+	token, payload, err := maker.CreateToken(util.RandomString(25), types.EmployeeRole, -time.Minute)
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 	require.NotEmpty(t, payload)

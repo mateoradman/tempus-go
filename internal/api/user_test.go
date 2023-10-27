@@ -16,6 +16,7 @@ import (
 	mockdb "github.com/mateoradman/tempus/internal/db/mock"
 	db "github.com/mateoradman/tempus/internal/db/sqlc"
 	"github.com/mateoradman/tempus/internal/token"
+	"github.com/mateoradman/tempus/internal/types"
 	"github.com/mateoradman/tempus/internal/util"
 	"github.com/stretchr/testify/require"
 	gomock "go.uber.org/mock/gomock"
@@ -81,7 +82,7 @@ func randomUser() db.User {
 		Language:  util.RandomLanguage(),
 		CreatedAt: time.Now().UTC(),
 		BirthDate: time.Now().UTC(),
-		Role:      util.EmployeeRole,
+		Role:      types.EmployeeRole,
 	}
 }
 

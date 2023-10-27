@@ -28,9 +28,9 @@ mock:
 	mockgen -source ./internal/db/sqlc/store.go -package mockdb -destination internal/db/mock/store.go Store
 
 db_docs:
-	dbdocs build doc/db.dbml
+	dbdocs build docs/db.dbml
 
 db_schema:
-	dbml2sql --postgres -o doc/schema.sql doc/db.dbml
+	dbml2sql --postgres -o docs/schema.sql docs/db.dbml
 
 .PHONY: postgres createdb dropdb sqlc server test migrateup migratedown mock db_docs db_schema
